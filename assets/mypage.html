@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>My HTML</title>
+</head>
+<body>
+<h1>MyHTML</h1>
+<p id="mytext">Hello!</p>
+<input type="button" value="Say hello" onClick="showAndroidToast('Hello Android!')" />
+<input type="button" value="Open Dialog" onClick="openAndroidDialog()" />
+<version>20151023</version>
+<form action="" method="post" name="form2" id="form2">
+
+
+<!--
+<input name="D" type="hidden" id="D0" size="12" value="103" style="color:red" >
+<input name="D" type="hidden" id="D1" size="12" value="10" style="color:red" >
+<input name="D" type="hidden" id="D2" size="12" value="1" style="color:red" >
+<input name="D" type="hidden" id="D3" size="12" value="103" style="color:red" >
+<input name="D" type="hidden" id="D4" size="12" value="12" style="color:red" >
+<input name="D" type="hidden" id="D5" size="12" value="3" style="color:red" >
+-->
+
+<p name="power" type="text" id="power" size="12" value="" style="color:red" ></p>
+<p name="kind" type="text" id="kind" size="12" value="" style="color:red" ></p>
+<p name="Money" type="text" id="Money" size="12" value="" style="color:red" >0</p>
+</form>
+
+<script language="javascript">
+   
+   function showAndroidToast(toast) 
+   {
+       AndroidFunction.showToast(toast);
+   }
+
+   function openAndroidDialog() 
+   {
+       AndroidFunction.openAndroidDialog();
+   }
+  
+   function callFromActivity(msg)
+   {
+		document.getElementById("mytext").innerHTML = msg;
+   }
+
+   
+
+function getdate(cy, cm, cd) 
+{
+	y = cy + 1911;
+	m=cm<10?"0"+cm:cm;
+	d=d<10?"0"+cd:cd;
+	return y+m+d;
+}
+
+var detail_nonsummer = new Array();
+var detail_summer = new Array();
+
+var detail = new Array(); 
+
+function Rate(StartDate, EndDate, inSummerStartMonth, inSummerStartDate, inSummerEndMonth, inSummerEndDate, inHomeLevel, inHomeRate, inHomeSummerRate, inBusLevel, inBusRate, inBusSummerRate) { 
+	    this.rateStartDate = StartDate; // 啟用日期 
+	    this.rateEndDate = EndDate; // 停用日期
+		this.rateSummerStartMonth = inSummerStartMonth; // 夏月啟始月份
+		this.rateSummerStartDate = inSummerStartDate; // 夏月啟始日期
+		this.rateSummerEndMonth = inSummerEndMonth; // 夏月結束月份
+		this.rateSummerEndDate = inSummerEndDate; // 夏月結束日期
+		this.homeLevel = inHomeLevel; // 家庭用電級距
+		this.homeRate = inHomeRate; // 家庭非夏月費率
+		this.homeSummerRate = inHomeSummerRate; // 家庭夏月費率
+		this.busLevel = inBusLevel; // 營業用電級距
+		this.busRate = inBusRate; // 營業非夏月費率
+		this.busSummerRate = inBusSummerRate; // 營業夏月費率
+		// 計算該費率的電費
+	    this.calculate = function (inStartDate, inEndDate, inPower, inKind) {			
+			var totMoney = 0;
+	        if(inEndDate < this.rateStartDate || inStartDate > this.rateEndDate) { // 輸入的時間不在此費率期間
+				return 0;
+			} else {
+				var totDays = Math.abs(inEndDate - inStartDate) / 24 / 60 / 60 / 1000 + 1;
+				var countStartDate, countSummerStartDate;
+				var countEndDate ,countSummerEndDate;
+				var countDays, countSummerDays;
+				var notSummerPower = 0; // 該計費期間屬於「非夏日」的用電度
+				var summerPower = 0; //  該計費期間屬於「夏日」的用電度
+				
+				// 計算該計費費率所適用的期間
+				if(inEndDate <= this.rateEndDate) {
+					countEndDate = inEndDate;
+				} else {
+					countEndDate = this.rateEndDate;
+				}
+				if(inStartDate <= this.rateStartDate) {
+					countStartDate = this.rateStartDate;
+				} else {
+					countStartDate = inStartDate;
+				}
+				
+				if(inStartDate.getFullYear() == inEndDate.getFullYear()) {
+					var summerStart = new Date(inStartDate.getFullYear(), this.rateSummerStartMonth, this.rateSummerStartDate);
+					var summerEnd = new Date(inEndDate.getFullYear(), this.rateSummerEndMonth, this.rateSummerEndDate);
+
+					if( countEndDate < summerStart || countStartDate > summerEnd) {
+						countSummerDays = 0;
+					} else if(countEndDate >= summerEnd && countStartDate <= summerStart) { 
+						// 計費期間超過整個夏月
+						countSummerDays = Math.abs(summerEnd - summerStart) / 24 / 60 / 60 / 1000 + 1;
+					} else if(countEndDate <= summerEnd && countStartDate >= summerStart) {
+						// 計費期間包含於夏月中
+						countSummerDays = Math.abs(countEndDate - countStartDate) / 24 / 60 / 60 / 1000 + 1;
+					} else if(countStartDate < summerStart && countEndDate <= summerEnd) {
+						countSummerDays = Math.abs(countEndDate - summerStart) / 24 / 60 / 60 / 1000 + 1;
+					} else if(countStartDate >= summerStart && countEndDate > summerEnd) {
+						countSummerDays = Math.abs(summerEnd - countStartDate) / 24 / 60 / 60 / 1000 + 1;
+					}
+				} else {
+					countSummerDays = 0;
+				}				
+				
+				countDays = Math.abs(countEndDate - countStartDate) / 24 / 60 / 60 / 1000 + 1 - countSummerDays;
+
+				notSummerPower = inPower;
+				var notSummerMoney = 0;
+
+				summerPower = inPower;
+				var summerMoney = 0;
+				
+				detail_summer = new Array();
+				detail_nonsummer = new Array();
+												
+				if(inKind=="home") { // 家庭
+					for ( var i= 0; i < this.homeLevel.length; i++ ) {
+						if (notSummerPower > 0) { // 非夏月
+							if(this.homeLevel[i] == 0) { // 到達最高的級距中斷
+								notSummerMoney += this.homeRate[i] * notSummerPower;
+								
+								detail_nonsummer.push( ""+this.homeRate[i]/10000 + " * " + notSummerPower+"" );
+								
+								break;
+							}
+							else if(notSummerPower < this.homeLevel[i]) { // 不到最大級距中斷
+								notSummerMoney += this.homeRate[i] * notSummerPower;
+								
+								detail_nonsummer.push( this.homeRate[i]/10000 + " * " + notSummerPower );
+								
+								break;
+							} else { 
+								notSummerMoney += this.homeRate[i] * this.homeLevel[i];
+								
+								detail_nonsummer.push( ""+this.homeRate[i]/10000 + " * " + this.homeLevel[i] +"");
+								
+								notSummerPower -= this.homeLevel[i];
+							}
+						} else { break; }
+					}
+					for ( var i= 0; i < this.homeLevel.length; i++ ) {
+						if (summerPower > 0) { // 夏月
+							if(this.homeLevel[i] == 0) { // 到達最高的級距中斷
+								summerMoney += this.homeSummerRate[i] * summerPower;
+								
+								detail_summer.push("" + this.homeSummerRate[i]/10000 + " * " + summerPower );
+								
+								break;
+							}
+							else if(summerPower < this.homeLevel[i]) { // 不到最大級距中斷
+								summerMoney += this.homeSummerRate[i] * summerPower;
+								
+								detail_summer.push("" + this.homeSummerRate[i]/10000 + " * " + summerPower );
+								
+								break;
+							} else { 
+								summerMoney += this.homeSummerRate[i] * this.homeLevel[i];
+								
+								detail_summer.push("" + this.homeSummerRate[i]/10000 + " * " + this.homeLevel[i] );
+								
+								summerPower -= this.homeLevel[i];
+							}
+						} else { break; }
+					}
+				} else { // 營業
+					for ( var i = 0; i < this.busLevel.length; i++ ) {
+						if (notSummerPower > 0) {
+							if(this.busLevel[i] == 0) {
+								notSummerMoney += this.busRate[i] * notSummerPower;
+								
+								detail_nonsummer.push( ""+this.busRate[i]/10000 + " * " + notSummerPower+"" );
+								
+								break;
+							}
+							else if(notSummerPower < this.busLevel[i]) {
+								notSummerMoney += this.busRate[i] * notSummerPower;
+								
+								detail_nonsummer.push( this.busRate[i]/10000 + " * " + notSummerPower );
+								
+								break;
+							} else {
+								notSummerMoney += this.busRate[i] * this.busLevel[i];
+								
+								detail_nonsummer.push( ""+this.busRate[i]/10000 + " * " + this.busLevel[i] +"");
+								
+								notSummerPower -= this.busLevel[i];
+							}
+						} else { break; }
+					}	
+					for ( var i = 0; i < this.busLevel.length; i++ ) {
+						if (summerPower > 0) {
+							if(this.busLevel[i] == 0) {
+								summerMoney += this.busSummerRate[i] * summerPower;
+								
+								detail_summer.push("" + this.busSummerRate[i]/10000 + " * " + summerPower );
+								
+								break;
+							}
+							else if(summerPower < this.busLevel[i]) {
+								summerMoney += this.busSummerRate[i] * summerPower;
+								
+								detail_summer.push("" + this.busSummerRate[i]/10000 + " * " + summerPower );
+								
+								break;
+							} else {
+								summerMoney += this.busSummerRate[i] * this.busLevel[i];
+								
+								detail_summer.push("" + this.busSummerRate[i]/10000 + " * " + this.busLevel[i] );
+								
+								summerPower -= this.busLevel[i];
+							}
+						} else { break; }
+					}
+				}
+				if( countDays > 0 )
+					detail.push("(" + detail_nonsummer.toString().replace(/,/g," + ") + ") * " + countDays + "/" + totDays );
+				
+				if( countSummerDays > 0 )
+					detail.push("(" + detail_summer.toString().replace(/,/g," + ") + ") * " + countSummerDays + "/" + totDays);
+				
+				totMoney = (notSummerMoney * countDays / totDays) + (summerMoney * countSummerDays / totDays);				
+				return totMoney/10000;
+			}			
+	    }; 
+}; 
+
+// 主程式 - 概算電費金額
+function TotalMoney(D, Kind , power)
+{
+	//document.form2.Money.value = ''; // 清除概算電費金額
+	
+	
+	var Rates = new Array();
+    var rate2008 = new Rate(
+            new Date(2008, 6, 1), new Date(2012, 5, 9), 5, 1, 8, 30,
+            new Array(220, 440, 340, 400, 0),
+            new Array(21000, 26800, 32700, 35500, 39700),
+            new Array(21000, 30200, 40500, 45100, 51000),
+            new Array(660, 340, 400, 0),
+            new Array(30200, 32700, 35500, 39700),
+            new Array(37600, 40500, 45100, 51000));
+    
+    var rate2012_0610 = new Rate(
+            new Date(2012, 5, 10), new Date(2013, 8, 30), 5, 1, 8, 30,
+            new Array(240, 420, 340, 400, 0),
+            new Array(21000, 26800, 36100, 40100, 45000),
+            new Array(21000, 30200, 43900, 49700, 56300),
+            new Array(660, 740, 1600, 0),
+            new Array(30200, 36800, 43100, 46400),
+            new Array(37600, 46200, 54800, 59200));
+    
+    var rate2013_1001 = new Rate( 
+		new Date(2013, 9, 1), new Date(2015, 2, 31), 5, 1, 8, 30, 
+		new Array(240, 420, 340, 400, 600, 0),
+		new Array(21000, 26800, 36100, 44800, 50300, 52800),
+		new Array(21000, 30200, 43900, 54400, 61600, 67100),
+		new Array(660, 740, 1600, 0),
+		new Array(30200, 36800, 43100, 53100),
+		new Array(37600, 46200, 54800, 67300));
+	
+	//new Date(2015, 3, 1), new Date(2015, 8, 30), 5, 1, 8, 30, 
+	
+	var rate2015_0401 = new Rate( 
+		new Date(2015, 3, 1), new Date(2015, 8, 30), 5, 1, 8, 30, 
+		new Array(240, 420, 340, 400, 600, 0),
+		new Array(18900, 24200, 33000, 42400, 49000, 52800),
+		new Array(18900, 27300, 40000, 51500, 59900, 67100),
+		new Array(660, 740, 1600, 0),
+		new Array(24500, 33200, 39100, 53100),
+		new Array(29100, 40400, 48100, 67300));
+	
+	var rate2015_1001 = new Rate( 
+		new Date(2015, 9, 1), new Date(9999, 11, 31), 5, 1, 8, 30, 
+		new Array(240, 420, 340, 400, 600, 0),
+		new Array(18100, 23300, 32000, 41800, 48500, 52800),
+		new Array(18100, 26400, 39000, 50900, 59400, 67100),
+		new Array(660, 740, 1600, 0),
+		new Array(23500, 32200, 38100, 53100),
+		new Array(28100, 39400, 47100, 67300));
+		
+        Rates[0] = rate2008;
+        Rates[1] = rate2012_0610;
+        Rates[2] = rate2013_1001;
+		Rates[3] = rate2015_0401;
+		Rates[4] = rate2015_1001;
+	
+	ErrMsg = "";
+	
+	// 日期陣列
+	//D = new Array(0,0,0,0,0,0);
+	
+	//讀取輸入日期
+	//for( i=0 ; i<6 ; i++ ) {
+	//	D[i] =  parseInt(document.form2.D[i].value);
+		//D[i] = F[i];
+	//}
+	
+	/*
+	D[0] = parseInt(old_year);
+	D[1] = old_month;
+	D[2] = old_date;
+	D[3] = parseInt(new_year);
+	D[4] = new_month;
+	D[5] = new_date;
+	*/
+	//D[0] += 1911;
+	//D[3] += 1911;
+	D[1] = D[1] - 1; // JavaScript的月份由 0 開始，故將畫面上的月份減 1
+	D[4] = D[4] - 1;
+	
+	//用電種類 - 家庭或營業
+	//Kind = document.form2.Kind.value;
+	
+	Temp = IsValidMonthDay(D[0],D[1],D[2]);
+	if(!Temp) ErrMsg += "開始日日期不正確\n";
+		
+	Temp = IsValidMonthDay(D[3],D[4],D[5]);
+	if(!Temp) ErrMsg += "結束日日期不正確\n";
+
+	StartDay = new Date(D[0],D[1],D[2]);
+	EndDay = new Date(D[3],D[4],D[5]);
+	
+	EndDay = EndDay.valueOf() - 24 * 60 * 60 * 1000; // 最後一日不計入，減去一天的時間
+	EndDay = new Date(EndDay);
+		
+	if(EndDay < StartDay) {
+		ErrMsg += "結束日必需大於開始日\n";
+		ErrMsg += D[0] + "\n";
+		ErrMsg += D[1] + "\n";
+		ErrMsg += D[2] + "\n";
+		ErrMsg += D[3] + "\n";
+		ErrMsg += D[4] + "\n";
+		ErrMsg += D[5] + "\n";
+		
+		
+	}
+	
+	//用電度數
+	//var reInteger = /^\d+$/; 
+	//if(!reInteger.test(document.form2.power.value)) {
+	//ErrMsg += "請輸入正確用電度數\n";
+	//}
+	//power = parseFloat(document.form2.power.value);
+	
+	
+	
+	if(power < 1 && power < 99999 ) ErrMsg += "請輸入正確用電度數\n";
+	
+	//用電期間日數，不計結束日
+	CountDay = (Math.abs(StartDay - EndDay))  / 24 / 60 / 60 / 1000;
+	if(CountDay > 70) ErrMsg += "日期間距過長\n";
+	if(CountDay < 0) ErrMsg += "日期間距過短\n";
+	
+	if(ErrMsg.length > 0) { 
+		alert(ErrMsg); return;
+	}
+	else {
+		var TempMoney = 0;
+		for (var i = 0; i < Rates.length ; i++) {
+			TempMoney += Rates[i].calculate(StartDay, EndDay, power, Kind);
+		}
+		
+		//document.form2.Money.value = Math.round(TempMoney);
+		//document.getElementById('Money').innerHTML= Math.round(TempMoney);
+		//return Math.round(TempMoney);
+		
+		//for android
+		window.TOTAL_MONEY.showMoney(Math.round(TempMoney));
+		window.TOTAL_MONEY.showFormula(detail.toString().replace(/,/g," + "));
+		
+		detail = new Array();
+		
+	}
+	return;
+}
+
+function GetDaysOfMonth(Year, Month) {
+	returnValue = (Month == 1 && (Year % 4 == 0) && ((Year % 100 != 0) || (Year % 400 == 0))) ? 29 : 28
+	if(Month == 0 || Month == 2 || Month == 4 || Month == 6 || Month == 7 || Month == 9 || Month == 11) {
+		returnValue = 31;
+	}
+	if(Month == 3 || Month == 5 || Month == 8 || Month == 10) {
+		returnValue = 30;
+	}
+	return(returnValue);
+}
+
+function IsValidMonthDay(Year, Month, Day) 
+{
+	if ( (GetDaysOfMonth(Year, Month)+1) > Day) { return true;}
+	else { return false;}
+}
+
+function MM_openBrWindow(theURL,winName,features) 
+{ //v2.0
+  window.open(theURL,winName,features, resizable=yes,scrollbars=yes);
+}
+
+
+   
+   
+   
+   
+
+   
+   
+ </script>
+
+</body>
+</html>
