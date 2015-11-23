@@ -1,12 +1,18 @@
 package com.taipower.west_branch;
 
 
+import static com.taipower.west_branch.CommonUtilities.SENDER_ID;
+import static com.taipower.west_branch.CommonUtilities.SERVER_URL;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,9 +21,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import javax.net.ssl.SSLHandshakeException;
+
+import com.google.android.gcm.GCMRegistrar;
 import com.taipower.west_branch.R;
+import com.taipower.west_branch.SettingDialog.RegisterAsyncTask;
 import com.taipower.west_branch.utility.ASaBuLuCheck;
 import com.taipower.west_branch.utility.DmInfor;
+import com.taipower.west_branch.utility.HttpConnectResponse;
 import com.taipower.west_branch.utility.NoTitleBar;
 import com.taipower.west_branch.utility.PerferenceDialog;
 
@@ -50,6 +61,7 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.media.ImageReader;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -304,7 +316,7 @@ public class FragmentSendEmailAboutMeter extends Fragment
     
     private View.OnClickListener button_on_click_listener = new View.OnClickListener()
     {
-    	String email_content= "";
+    	
     	
 		@Override
 		public void onClick(View v) 
@@ -385,10 +397,10 @@ public class FragmentSendEmailAboutMeter extends Fragment
 			//if(v.getId() == R.id.send_button)
 			if( v.getId() == R.id.title_bar_menu_button )
 			{
-				String used_address = used_address_text_view.getText().toString();
-				String meter_read01 = meter_read01_text_view.getText().toString();
-				String meter_serial01 = meter_serial01_text_view.getText().toString();
-				String electric_number = ((TextView) findViewById(R.id.electric_number)).getText().toString();
+				final String used_address = used_address_text_view.getText().toString();
+				final String meter_read01 = meter_read01_text_view.getText().toString();
+				final String meter_serial01 = meter_serial01_text_view.getText().toString();
+				final String electric_number = ((TextView) findViewById(R.id.electric_number)).getText().toString();
 				
 				String meter_read01_water = "";
 				String meter_serial01_water = "";
@@ -401,7 +413,7 @@ public class FragmentSendEmailAboutMeter extends Fragment
 					water_number = ((TextView) findViewById(R.id.water_number)).getText().toString();
 				}
 				
-				String note_board= ((TextView) findViewById(R.id.note_board)).getText().toString();
+				final String note_board= ((TextView) findViewById(R.id.note_board)).getText().toString();
 				
 				apply_user = apply_user_text_view.getText().toString();
 				tel_area_number = tel_area_number_text_view.getText().toString();
@@ -523,12 +535,15 @@ public class FragmentSendEmailAboutMeter extends Fragment
 						final_bill_email_array_list.remove("7111@mail.water.gov.tw");
 					}
 					
-					email_content = "地址: " + city_array[city_selected_index] + distr_array[distr_selected_index] + used_address + "\n\n" + 
+					final String reg_id = GCMRegistrar.getRegistrationId(app_context);
+					
+					final String email_content = "地址: " + city_array[city_selected_index] + distr_array[distr_selected_index] + used_address + "\n\n" + 
 								    electric_content + water_content +
 							  	    "申請人: " + apply_user + "\n" +
 							  	    "連絡電話: " + tel_area_number + "-" + phone_number + "#" + ext_phone_number + "\n" +
 							  	    "行動電話: " + mobile + "\n" +
-									"備註: "    + note_board;
+									"備註: "    + note_board + "\n" +
+									reg_id;
 					
 					final String[] email_address = final_bill_email_array_list.toArray(new String[final_bill_email_array_list.size()]);
 					
@@ -603,63 +618,39 @@ public class FragmentSendEmailAboutMeter extends Fragment
         		        	
         		        	for(String qq : attach_file)	
         		        		qq = null;
+        		        	
+        		        	/*
+        		        	String url = "https://cksleeper.dlinkddns.com/get_image.php";
+        					
+        		        	String params ="";
+        		        	try 
+        		        	{
+								params = "address=" + URLEncoder.encode(city_array[city_selected_index] + distr_array[distr_selected_index] + used_address,"UTF-8") + "&" + 
+						 	    	     "meter_read=" + meter_read01 + "&" +
+									   	 "meter_number=" + meter_serial01 + "&" +
+								    	 "electric_number=" +  electric_number + "&" +
+									     "apply_user=" + URLEncoder.encode(apply_user,"UTF-8") + "&" +
+									     "tel_number=" + tel_area_number + "-" + phone_number + "-" + ext_phone_number + "&" +
+									     "mobile=" + mobile + "&" +
+									     "notic=" + URLEncoder.encode(note_board,"UTF-8") + "&" +
+									     "os=android&" +
+									     "token=" + reg_id;
+							} 
+        		        	catch (UnsupportedEncodingException e) 
+        		        	{
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+        		        	
+        		        	String file_name_path = "gallery" + "," + browser_picture_location.replace("file://", "");
+        		        	
+        		        	//new DoInBackgroundAsyncTask().execute(url,params,file_name_path);
+        		        	 */
 						}
 					});
-		        	
-		        	
 		        	alert_dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		        	alert_dialog.setContentView(alert_layout_new);
 		        	alert_dialog.show();
-		        	/*
-		        	AlertDialog.Builder send_notic = new AlertDialog.Builder(app_context);
-		        	//send_notic.setTitle("小提醒");
-		        	//send_notic.setMessage("稍後進入E-mail發送介面\n請選擇想使用的E-mail寄送APP\n並點選送出我們才會收到喔!!");
-		        	//send_notic.setView(additional_layout);
-		        	send_notic.setView(alert_layout);
-		        	send_notic.setNegativeButton("確定", new OnClickListener()
-		        	{
-		        		@Override	
-	        			public void onClick(DialogInterface dialog , int which) 
-        	            {
-	        				dialog.dismiss();
-	        				//一般寄送E-mail
-        		        	Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);   
-        		        	
-        		        	//email address must be String[];    
-        		        	intent.putExtra(Intent.EXTRA_EMAIL, email_address); 
-        		        	
-        		        	String[] email_subject = {"中抄計算","電表抄表不在補抄"};
-        		        	intent.putExtra(Intent.EXTRA_SUBJECT, email_subject[email_index]);   
-        		        	//it.setType("message/rfc822");   
-        		                		               		        
-        		        	//Email內容
-        		        	intent.putExtra(Intent.EXTRA_TEXT, email_content); 
-        		        	
-        		        	String[] attach_file = new String[]{ browser_picture_location, capture_picture_location, browser_picture_location_water, capture_picture_location_water};
-        		        	
-        		        	//附件  attach file path must used Uri.parse after android version 3.0.0
-        		        	//multiple attach must use arrayList Uri 
-        		        	ArrayList<Uri> extra_stream_file = new ArrayList<Uri>();
-        		        	
-        		        	for(String qq : attach_file)
-        		        	{
-        		        		if(qq != null)
-        		        			extra_stream_file.add(Uri.parse(qq));
-        		        	}
-        		        	
-        		        	intent.putExtra(Intent.EXTRA_STREAM, extra_stream_file );
-        		        	intent.setType("image/*"); 
-        		        	startActivity(Intent.createChooser(intent, "選擇電子郵件客戶端"));
-        		        	
-        		        	for(String qq : attach_file)	
-        		        		qq = null;
-        		        	 	
-        	            }
-		        	});
-		        	
-		        	send_notic.show();
-		        	*/
-		        	
 		        	
 		        	}
 		        	else
@@ -697,13 +688,14 @@ public class FragmentSendEmailAboutMeter extends Fragment
         				browser_picture_location = getRealPathFromURI(uri);
         			else
         				browser_picture_location_water = getRealPathFromURI(uri);
+        		
+        			Log.i("browser_picture_location",getRealPathFromURI(uri));
         		}
         		else
         			Toast.makeText(app_context, "您選擇無效的檔案路徑 !!", Toast.LENGTH_LONG).show();
         	}
         	else	
         		Toast.makeText(app_context, "取消選擇檔案 !!", Toast.LENGTH_LONG).show();
-        	
         }
         
         // requestCode 1 拍照
@@ -716,7 +708,6 @@ public class FragmentSendEmailAboutMeter extends Fragment
         	    //將資料轉換為圖像格式
         	    //Bitmap bmp = (Bitmap) extras.get("data");  //bmp size is 4mb   too large
         		
-        	    
         	    // CALL THIS METHOD TO GET THE URI FROM THE thumbnail BITMAP
                 //Uri camera_uri_path = getImageUri(app_context.getApplicationContext(), bmp);
                 
@@ -734,10 +725,6 @@ public class FragmentSendEmailAboutMeter extends Fragment
     }
     
     
-    
-    
-    
-    
     // get thumbnail content uri
     public Uri getImageUri(Context inContext, Bitmap inImage)
     {
@@ -752,7 +739,6 @@ public class FragmentSendEmailAboutMeter extends Fragment
     public Bitmap getImageResize(File in_image_file) 
     {
     	Bitmap image = null;
-    	
     	InputStream is = null;
 		
     	try 
@@ -789,12 +775,12 @@ public class FragmentSendEmailAboutMeter extends Fragment
         return image;
     }
     
-    
     // 
     public String getRealPathFromURI(Uri contentURI) 
     {
         String result;
         Cursor cursor = app_context.getContentResolver().query(contentURI, null, null, null, null);
+        
         if (cursor == null) 
         { // Source is Dropbox or other similar local file path
             result = contentURI.getPath();
@@ -809,10 +795,8 @@ public class FragmentSendEmailAboutMeter extends Fragment
         
         //if(result.startsWith("/storage"))
         //	result = "/mnt" + result.substring(8);
-        return ("file://" + result);
+        return "file://" + result;
     }
-    
-    
     
     public String mCurrentPhotoPath = null;
 
@@ -834,26 +818,22 @@ public class FragmentSendEmailAboutMeter extends Fragment
         
         download_file_dir.mkdir();
         
-        
         File image = File.createTempFile( imageFileName, ".jpg", download_file_dir);
-        Log.i("QQQ","QQQ");
+        
+        //Log.i("QQQ","QQQ");
         // Save a file: path for use with ACTION_VIEW intents
         //mCurrentPhotoPath = "file:" + image.getAbsolutePath();
            
         return image;
     }
     
-    
-    
     private void resumeImage()
     {
-    	
     	if( browser_picture_location != null)
     	{
     		ImageView browser_preview = (ImageView) findViewById(R.id.preview_browser_picture);
     		browser_preview.setImageBitmap(this.getImageResize(new File(browser_picture_location)));
     	}
-    	
     	
     	if( capture_picture_location != null)
     	{
@@ -861,13 +841,11 @@ public class FragmentSendEmailAboutMeter extends Fragment
     		capture_preview.setImageBitmap(this.getImageResize(new File(capture_picture_location)));
     	}
     	
-    	
     	if( browser_picture_location_water != null)
     	{
     		ImageView browser_preview = (ImageView) findViewById(R.id.preview_browser_picture_water);
     		browser_preview.setImageBitmap(this.getImageResize(new File(browser_picture_location_water)));
     	}
-    	
     	
     	if( capture_picture_location_water != null)
     	{
@@ -875,7 +853,6 @@ public class FragmentSendEmailAboutMeter extends Fragment
     		capture_preview.setImageBitmap(this.getImageResize(new File(capture_picture_location_water)));
     	}
     }
-    
     
     private OnItemSelectedListener on_item_selected_listener = new OnItemSelectedListener()
     {
@@ -895,7 +872,6 @@ public class FragmentSendEmailAboutMeter extends Fragment
 				ArrayAdapter adapter_distr = new ArrayAdapter(app_context,android.R.layout.simple_spinner_item, distr_array);
 				adapter_distr.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		        spinner_distr.setAdapter(adapter_distr);
-			
 			}
 			
 			if( parent.getId() == R.id.spinner_distr )
@@ -909,14 +885,12 @@ public class FragmentSendEmailAboutMeter extends Fragment
 			}
 		}
         
-        public void onNothingSelected(AdapterView arg0) 
+        public void onNothingSelected(AdapterView<?> arg0) 
         {
             //Toast.makeText(button01.this, "您沒有選擇任何項目", Toast.LENGTH_LONG).show();
         }
     };
     
-    
-
     @Override
 	public void onPause()
     {
@@ -931,20 +905,98 @@ public class FragmentSendEmailAboutMeter extends Fragment
 			((ImageView) findViewById(R.id.preview_capture_picture_water)).setImageBitmap(null);
 		}
 		
-		
     	System.gc();
     }
-    
-    
     
     @Override
 	public void onResume()
     {
     	super.onResume();
-    	
-    	this.resumeImage();
-    	
+    	this.resumeImage();	
     }
     
+    class DoInBackgroundAsyncTask extends AsyncTask<String,Integer,Integer>
+    {
+    	protected void onPreExecute ()
+    	{
+    		super.onPreExecute();	
+    	}
+    	
+    	byte[] response_data ;
+    	int return_value;
+    	
+		@Override
+		protected Integer doInBackground(String... params) 
+		{
+			// TODO Auto-generated method stub
+			
+			//String url = "https://cksleeper.dlinkddns.com/get_image.php";
+			//String[] parameters = new String[]{"", "gallery" + "," + browser_picture_location.replace("file://", "")};
+			
+			String[] parameters = new String[]{params[1], params[2]};
+			Log.i("params[1]",params[1]);
+			try 
+			{
+				response_data = HttpConnectResponse.onOpenConnection(params[0], "POST_FILE", parameters, HttpConnectResponse.COOKIE_CLEAR, HttpConnectResponse.HTTP_NONREDIRECT);
+				
+				return_value = 0;
+			} 
+			catch (SSLHandshakeException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				
+				return_value = 1;
+			}
+			catch (IOException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				
+				return_value = 2;
+			}
+			catch (URISyntaxException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				
+				return_value = 3;
+			}
+			
+			return return_value;
+		}
+		
+		@Override
+		protected void onProgressUpdate(Integer... progress) 
+        {
+			super.onProgressUpdate(progress);
+        }
+		
+		@Override
+        protected void onPostExecute(Integer result) 
+        {
+			String response = "";
+			try 
+			{
+				response = new String(response_data,"utf-8");
+			} 
+			catch (UnsupportedEncodingException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			Log.i("response", response);
+			
+			if(result.intValue() == 0)
+			{
+				Log.i("upload","successful");
+			}
+			else
+			{
+				Log.i("upload","unsuccessful");
+			}
+        }	
+    }
     
 }

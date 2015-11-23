@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -212,16 +213,19 @@ public class FragmentProgress extends Fragment
     			try
     			{
     			paraments = "__EVENTTARGET=Button2&" +
-    						"__EVENTARGUMENT=" + __EVENTARGUMENT + "&" +
-    						"__VIEWSTATE=" + __VIEWSTATE + "&" +
-    						"__VIEWSTATEGENERATOR=" + __VIEWSTATEGENERATOR + "&" +
-    						"__EVENTVALIDATION=" + __EVENTVALIDATION + "&" +
+    						"__EVENTARGUMENT=" + URLEncoder.encode(__EVENTARGUMENT,"UTF-8") + "&" +
+    						"__VIEWSTATE=" + URLEncoder.encode(__VIEWSTATE,"UTF-8") + "&" +
+    						"__VIEWSTATEGENERATOR=" +URLEncoder.encode( __VIEWSTATEGENERATOR,"UTF-8") + "&" +
+    						"__EVENTVALIDATION=" + URLEncoder.encode(__EVENTVALIDATION,"UTF-8") + "&" +
     						"custname=" + URLEncoder.encode(user_name, "UTF-8")  + "&" +
     						"dist=" + dist + "&" +
     						"cpsno=" + cpsno + "&" + 
     						"rb_select=" + rb_select + "&" +
     						"nas=" + nas + "&" +
     						"nasno=" + nasno;
+    			
+    			Log.i("paraments",paraments);
+    			
     			}
     			catch (UnsupportedEncodingException e)
     			{
@@ -272,7 +276,7 @@ public class FragmentProgress extends Fragment
     				if( session_tag.equals("refresh") )
     					response_data = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
     				else
-    					response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", params[2], HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
+    					response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
     				
     				
 					if( response_data == null)
@@ -561,9 +565,9 @@ public class FragmentProgress extends Fragment
     				paraments = "__EVENTTARGET=&" + 
     							"__EVENTARGUMENT=&" +
     							"__VIEWSTATE=&" +
-    							"__VIEWSTATEGENERATOR=" + __VIEWSTATEGENERATOR + "&" +
-    							"__PREVIOUSPAGE=" + __PREVIOUSPAGE + "&" +
-    							"__EVENTVALIDATION=" + __EVENTVALIDATION + "&" +
+    							"__VIEWSTATEGENERATOR=" + URLEncoder.encode(__VIEWSTATEGENERATOR,"UTF-8") + "&" +
+    							"__PREVIOUSPAGE=" + URLEncoder.encode(__PREVIOUSPAGE,"UTF-8") + "&" +
+    							"__EVENTVALIDATION=" + URLEncoder.encode(__EVENTVALIDATION,"UTF-8") + "&" +
     							"Button1=" + URLEncoder.encode("取消此筆申辦資料","UTF-8");
     			}
     			catch (UnsupportedEncodingException e)
@@ -603,10 +607,10 @@ public class FragmentProgress extends Fragment
 					try 
 					{
 						paraments = "__EVENTARGUMENT=&" + 
-							   "__VIEWSTATE=" + __VIEWSTATE + "&" +
-							   "__VIEWSTATEGENERATOR=" + __VIEWSTATEGENERATOR + "&" +
-							   "__PREVIOUSPAGE=" + __PREVIOUSPAGE + "&" + 
-							   "__EVENTVALIDATION=" + __EVENTVALIDATION + "&" +
+							   "__VIEWSTATE=" + URLEncoder.encode(__VIEWSTATE,"UTF-8") + "&" +
+							   "__VIEWSTATEGENERATOR=" + URLEncoder.encode(__VIEWSTATEGENERATOR,"UTF-8") + "&" +
+							   "__PREVIOUSPAGE=" + URLEncoder.encode(__PREVIOUSPAGE,"UTF-8") + "&" + 
+							   "__EVENTVALIDATION=" + URLEncoder.encode(__EVENTVALIDATION,"UTF-8") + "&" +
 							   "TB_name=" + URLEncoder.encode(apply_user,"UTF-8") + "&" + 
 							   "TB_email=" + email + "&" +
 							   "TB_area=" + tel1 + "&" +

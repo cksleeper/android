@@ -434,7 +434,7 @@ public class online_service_change_used_address extends Activity
 			
 			try 
 			{
-				response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", params[2], HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
+				response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
 			} 
 			catch (IOException e) 
 			{

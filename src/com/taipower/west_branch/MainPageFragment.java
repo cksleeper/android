@@ -26,6 +26,10 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -66,7 +70,9 @@ public class MainPageFragment extends Fragment
 	private MainPageFragment this_class;
 	
 	private View current_view;
-	private WebView loading_webview; 
+	private WebView loading_webview;
+	
+	private DmInfor dm;
 	
 	private String fragment_tag;
 	
@@ -112,16 +118,14 @@ public class MainPageFragment extends Fragment
 		
 		((TextView) findViewById(R.id.app_version)).setText(version_name);
 		
+		dm = new DmInfor(app_activity, app_context);
 		
-		DmInfor dm = new DmInfor(app_activity, app_context);
 		
 		loading_webview = (WebView) findViewById(R.id.loading_webview);
 		loading_webview.setWebViewClient(new WebViewClient());
 		
 		int web_view_scale_rate = (int) (100.0f * ((float) dm.scale / 3.0f) * (7.0f/10.0f));
-		
-		
-		Log.i("qq","" + dm.v_width + " "+ web_view_scale_rate );
+		//Log.i("qq","" + dm.v_width + " "+ web_view_scale_rate );
 		
 		loading_webview.setInitialScale( web_view_scale_rate );
 		
@@ -140,6 +144,7 @@ public class MainPageFragment extends Fragment
 		
 		//loading_webview.setOnClickListener(on_click_listener);  //not working
 		//loading_webview.setOnTouchListener(on_touch_listener);
+		
 		
 		new BackgroundAsyncTask().execute();		
 		
@@ -245,10 +250,6 @@ public class MainPageFragment extends Fragment
 				default :
 					break;
 			}
-			
-			
-				
-			
 		}
 	};
 	
@@ -258,7 +259,7 @@ public class MainPageFragment extends Fragment
 		public boolean onTouch(View v, MotionEvent event)
 		{	
 			//Log.i("id:", "" + v.getId());
-			
+			/*
 			if(v.getId() == R.id.loading_webview)
 			{
 				Intent intent = new Intent();
@@ -267,8 +268,7 @@ public class MainPageFragment extends Fragment
 				app_activity.startActivity(intent);
 			}
 			else
-				v.startAnimation(button_animation);
-			
+			*/	v.startAnimation(button_animation);
 			
 			return false;
 		}
@@ -289,13 +289,13 @@ public class MainPageFragment extends Fragment
 		});
 		
 		super.onResume();
-		
 	}
 	
 	
-	class BackgroundAsyncTask extends AsyncTask<Integer,Integer,Integer>
+	private class BackgroundAsyncTask extends AsyncTask<Integer,Integer,Integer>
 	{
-
+		String laoding_data;
+		
 		@Override
 		protected Integer doInBackground(Integer... params) 
 		{
@@ -305,36 +305,44 @@ public class MainPageFragment extends Fragment
 			
 			if( ASaBuLuCheck.isOnline(app_activity))
 			{
-			try 
-			{
-				URL url = new URL("http://www.taipower.com.tw/");
-				
-				InputStream input_stream = ((HttpURLConnection) url.openConnection()).getInputStream();
-				
-				String qq = new String(HttpConnectResponse.inputStreamToByteArray(input_stream),"UTF-8");
-				
-				if(qq == null) 
+				try 
+				{
+					URL url = new URL("http://www.taipower.com.tw/");
+					InputStream input_stream = ((HttpURLConnection) url.openConnection()).getInputStream();
+					
+					String qq = new String(HttpConnectResponse.inputStreamToByteArray(input_stream),"UTF-8");
+					
+					URL loading_url = new URL("http://stpc00601.taipower.com.tw/Meter/js/loadpara.js");
+					String laoding_js = new String( HttpConnectResponse.inputStreamToByteArray(loading_url.openConnection().getInputStream()),"UTF-8");
+					
+					laoding_js = laoding_js.replace("\n", "").replace("\t", "").replace(" ","").replace("\r", "").replace(",","").replace("\"\"", "\"");
+					Log.i("laoding_js",laoding_js );
+					int load_info_index = laoding_js.indexOf("loadInfo");
+					int load_info_end =  laoding_js.indexOf("<!");
+					
+					laoding_data =  laoding_js.substring(load_info_index + 8 + 2,load_info_end - 1);
+					
+					Log.i("laoding_data",laoding_data);
+					
+					if(qq == null) 
+						return_value = 1;
+				} 
+				catch (MalformedURLException e) 
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 					return_value = 1;
+				} 
+				catch (IOException e) 
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				
-			} 
-			catch (MalformedURLException e) 
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return_value = 1;
-			} 
-			catch (IOException e) 
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				
-				return_value = 1;
-			}
+					return_value = 1;
+				}
 			}
 			else
 				return_value = 1;
-			
-			 
 			
 			return return_value;
 		}
@@ -349,11 +357,120 @@ public class MainPageFragment extends Fragment
 				error_text_view.setText("網路發生問題！！\n請稍候再試！！");
 				
 				loading_webview.addView(error_text_view);
+			}
+			else
+			{
+				/*
+				Thread task = new Thread(new Runnable()
+				{
+					@Override
+					public void run() 
+					{
+						// TODO Auto-generated method stub
+						final String[] laoding_data_array = laoding_data.split("\"");
+						final LinearLayout loading_layout = (LinearLayout) current_view.findViewById(R.id.laoding_layout);
 				
+						for(int i = 1 ; i < 100 ; i++)
+						{
+							final int k = i;
+							try 
+							{
+								Thread.sleep(100);
+								
+								app_activity.runOnUiThread(new Runnable()
+								{
+									@Override
+									public void run() 
+									{
+										// TODO Auto-generated method stub
+										
+										if(loading_graphy != null)
+										{	
+											loading_layout.removeAllViews();
+											loading_graphy = null;
+										}
+									
+										String laoding = String.valueOf(Float.valueOf(laoding_data_array[1]) * ((float) k / 100.0f));
+								
+										loading_graphy = new LoadingGraphy( app_context, new String[]{"",laoding,"",laoding_data_array[3]});
+								
+										loading_layout.addView(loading_graphy);
+									}
+								});
+							} 
+							catch (InterruptedException e) 
+							{
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				});
+				task.start();
+				*/
 			}
 		}
-		
 	}
+	
+	LoadingGraphy loading_graphy = null;
+	
+	private class LoadingGraphy extends View implements Runnable
+	{
+		float view_height;
+		String[] loading_data;
+		float loading_limit_height;
+		float loading_current_height;
+		
+		public LoadingGraphy(Context context, String[] loading_data)
+		{
+			super(context);
+			
+			this.loading_data = loading_data;
+			this.view_height = dm.scale * 190.0f;
+			this.loading_limit_height = view_height;
+			this.loading_current_height = (Float.valueOf(loading_data[1]) / Float.valueOf(loading_data[3])) * view_height;
+		}
+		
+		@Override
+		public void onDraw(Canvas canvas)
+		{
+			super.onDraw(canvas);
+			
+			Paint loading_green = new Paint();
+			loading_green.setColor(0xFF04D215);
+			loading_green.setStrokeWidth(30.0f);
+			
+			Paint loading_yellow = new Paint();
+			loading_yellow.setColor(0xFFF8FF01);
+			loading_yellow.setStrokeWidth(100.0f);
+			
+			Paint loading_orange = new Paint();
+			loading_orange.setColor(0xFF9E01);
+			loading_orange.setStrokeWidth(100.0f);
+			
+			Paint loading_red = new Paint();
+			loading_red.setColor(0xFFFF0F00);
+			loading_red.setStrokeWidth(100.0f);
+			
+			Paint loading_black = new Paint();
+			loading_black.setColor(0xFF000000);
+			loading_black.setStrokeWidth(100.0f);
+			
+			canvas.drawLine(0.0f, view_height, 0.0f, view_height - loading_current_height , loading_green);
+			
+		}
+
+		@Override
+		public void run() 
+		{
+			// TODO Auto-generated method stub
+			while(!Thread.currentThread().isInterrupted())  
+	        {  
+	            postInvalidate();   	//update ui 
+	        }  
+		}
+	}
+	
 	
 	class MyJavaScriptInterface
 	{

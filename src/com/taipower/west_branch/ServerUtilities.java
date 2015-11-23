@@ -22,6 +22,7 @@ import static com.taipower.west_branch.CommonUtilities.displayMessage;
 import com.google.android.gcm.GCMRegistrar;
 import com.taipower.west_branch.R;
 import com.taipower.west_branch.R.string;
+import com.taipower.west_branch.utility.HttpConnectResponse;
 
 import android.content.Context;
 import android.util.Log;
@@ -32,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,12 +41,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import javax.net.ssl.SSLHandshakeException;
+
 /**
  * Helper class used to communicate with the demo server.
  */
-public final class ServerUtilities 
+public final class ServerUtilities extends Object
 {
-
     private static final int MAX_ATTEMPTS = 5;
     private static final int BACKOFF_MILLI_SECONDS = 2000;
     private static final Random random = new Random();
@@ -54,17 +57,13 @@ public final class ServerUtilities
      *
      * @return whether the registration succeeded or not.
      */
-    public static boolean register(final Context context, 
-    							   final String regId , 
-    							   final String electric_number_list , 
-    							   final String email , 
-    							   final String phone_number, 
-    							   final String mobile) 
+    public static boolean register(final Context context, final String regId , final String electric_number_list , final String email , final String phone_number, final String mobile) 
     {
         Log.i(TAG, "registering device (regId = " + regId + ")");
-        String serverUrl = SERVER_URL + "/register.php";
-        Map<String, String> params = new HashMap<String, String>();
         
+        String serverUrl = SERVER_URL + "/register.php";
+        
+        Map<String, String> params = new HashMap<String, String>();
         params.put("electric_number", electric_number_list);
         params.put("email", email);
         params.put("phone_number",phone_number);
@@ -117,7 +116,51 @@ public final class ServerUtilities
         CommonUtilities.displayMessage(context, message);
         return false;
     }
-
+    
+    public static boolean register(Context context, String reg_id)
+    {
+    	String url = "https://cksleeper.dlinkddns.com/android.php";
+    	String[] parameters = new String[]{"reg_id=" + reg_id};
+    	
+    	
+    	try 
+    	{
+    		byte[] response_data = HttpConnectResponse.onOpenConnection(url, "POST", parameters, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
+		
+			GCMRegistrar.setRegisteredOnServer(context, true);
+			
+			String response_string;
+			
+			if( response_data != null )
+			{	
+				response_string = new String(response_data);
+				Log.i("GCM register status",response_string);
+			
+				if( response_string.equalsIgnoreCase("GCM OK") )
+					return true;
+			}
+			else
+				return false;
+    	} 
+    	catch (SSLHandshakeException e) 
+    	{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+    	catch (IOException e) 
+    	{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+    	catch (URISyntaxException e) 
+    	{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	return false;
+    }
+    
     /**
      * Unregister this account/device pair within the server.
      */
@@ -148,12 +191,7 @@ public final class ServerUtilities
     }
 
     
-    public static boolean update(final Context context, 
-			   					 final String regId , 
-			   					 final String electric_number_list , 
-			   					 final String email , 
-			   					 final String phone_number, 
-			   					 final String mobile) 
+    public static boolean update(final Context context, final String regId , final String electric_number_list , final String email , final String phone_number, final String mobile) 
     {
     	Log.i(TAG, "update device (regId = " + regId + ")");
         String serverUrl = SERVER_URL + "/update.php";

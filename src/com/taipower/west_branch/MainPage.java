@@ -1,8 +1,12 @@
 package com.taipower.west_branch;
 
+import static com.taipower.west_branch.CommonUtilities.SENDER_ID;
+import static com.taipower.west_branch.CommonUtilities.SERVER_URL;
+
 import java.util.Calendar;
 import java.util.Date;
 
+import com.google.android.gcm.GCMRegistrar;
 import com.taipower.west_branch.R;
 import com.taipower.west_branch.utility.ASaBuLuCheck;
 import com.taipower.west_branch.utility.NoTitleBar;
@@ -15,6 +19,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -75,6 +80,9 @@ public class MainPage extends Activity
 		MainPageFragment fragment = new MainPageFragment();  
 		transaction.replace(R.id.fragment_content, fragment,"main_page");  
         transaction.commit();   
+        
+        //GCM
+        //startGCMRegister();
 	}
 	
 	public void ebppsLoginCount()
@@ -87,8 +95,7 @@ public class MainPage extends Activity
     		{
     			setting.edit().putString("last_login_time", "0").commit();
     			Log.i("last_login_time","reset after 900 seconds");
-    		}
-    		
+    		}	
     	};
     	
     	handler.postDelayed(running_waiting, 900000);
@@ -179,7 +186,6 @@ public class MainPage extends Activity
         
 			Toast toast = Toast.makeText(app_context, "要離開嗎？請再按一次 >_* ", Toast.LENGTH_SHORT);
 
-        
 			if(double_touch)
 			{	
 				double_touch = false;
@@ -244,7 +250,6 @@ public class MainPage extends Activity
 			}
 			
 			//Log.i("wait time","2 seconds");
-			
 			double_touch = false;
 		}
 	};
@@ -252,11 +257,96 @@ public class MainPage extends Activity
 	@Override
 	protected void onDestroy()
 	{
-		
 		setting.edit().putString("last_login_time", "0").commit();
 		
 		Log.i("last_login_time","reset");
 		
 		super.onDestroy();
 	}
+	
+	private void startGCMRegister()
+    {
+    	checkNotNull(SENDER_ID, "SENDER_ID");
+        // Make sure the device has the proper dependencies.
+        GCMRegistrar.checkDevice(app_context);
+        // Make sure the manifest was properly set - comment out this line
+        // while developing the app, then uncomment it when it's ready.
+        GCMRegistrar.checkManifest(app_context);
+		
+        //registerReceiver(mHandleMessageReceiver , new IntentFilter(DISPLAY_MESSAGE_ACTION));
+		final String reg_id = GCMRegistrar.getRegistrationId(app_context);
+		
+		if (reg_id.equals("")) 
+		{
+			//Automatically registers application on startup.
+			Log.i("GCM", "unregistrate Google GCM, registrating");
+			GCMRegistrar.register(app_context, SENDER_ID );
+		} 
+		else 
+		{	
+			// Device is already registered on GCM, check server.
+			if( GCMRegistrar.isRegisteredOnServer(app_context) ) 
+			{
+				// Skips registration ? No ! Update registration.
+				Log.i("GCM state :", getString(R.string.already_registered) );
+				Log.i("GCM state :", "try to update..." );
+				
+				//new RegisterAsyncTask().execute("register",reg_id);
+			} 
+			else 
+			{
+				// Try to register again, but not in the UI thread.
+				// It's also necessary to cancel the thread onDestroy(),
+				// hence the use of AsyncTask instead of a raw thread.
+				
+				new RegisterAsyncTask().execute("register",reg_id);	
+			}		
+		}
+    }
+    
+    private class RegisterAsyncTask extends AsyncTask<String,Void,Void>
+	{
+		@Override
+		protected Void doInBackground(String... params) 
+		{
+			// TODO Auto-generated method stub                          
+			String tag_value = params[0];
+			boolean registered = false ;
+			
+			if( tag_value.equals("register"))
+			{
+				//registered = ServerUtilities.register(app_context, params[1] , params[2] , params[3] , params[4], params[5]);
+				registered = ServerUtilities.register(app_context, params[1]);
+				// At this point all attempts to register with the app
+				// server failed, so we need to unregister the device
+				// from GCM - the app will try to register again when
+				// it is restarted. Note that GCM will send an
+				// unregistered callback upon completion, but
+				// GCMIntentService.onUnregistered() will ignore it.
+			
+				if(registered)
+					Log.i("GCM","registered");
+			}
+			
+			if( tag_value.equals("update"))
+			{
+				//registered = ServerUtilities.update(app_context, params[1] , params[2] , params[3] , params[4], params[5]);//
+				registered = ServerUtilities.register(app_context, params[1]);
+				
+				if(registered)
+					Log.i("GCM","registered");
+			}
+			
+			//if (!registered) 
+			//	GCMRegistrar.unregister(app_context);
+			
+			return null;
+		}
+	}
+    
+    private void checkNotNull(Object reference, String name) 
+    {
+        if (reference == null) 
+        	throw new NullPointerException( getString(R.string.error_config, name));
+    }
 }

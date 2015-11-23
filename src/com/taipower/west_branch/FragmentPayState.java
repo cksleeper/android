@@ -303,7 +303,7 @@ public class FragmentPayState extends Fragment
 				
 				if( tag_value.equals("send") )
 				{	
-					response_data = HttpConnectResponse.onOpenConnection( params[1], "POST", params[2], HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+					response_data = HttpConnectResponse.onOpenConnection( params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
 					
 					return_value = 2;
 				}
@@ -317,7 +317,7 @@ public class FragmentPayState extends Fragment
 				
 				if( tag_value.equals("show_money1") )
 				{	
-					response_data = HttpConnectResponse.onOpenConnection( params[1], "POST", params[2], HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+					response_data = HttpConnectResponse.onOpenConnection( params[1], "POST",new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
 					
 					return_value = 6;
 				}

@@ -1363,7 +1363,7 @@ public class FragmentEbppsLight extends Fragment
 			this.view_width = (float) dm.v_width - dm_widht_adjust; 
 			this.view_height = dm.scale * 180.0f;
 			
-			Log.i("view_width view_height", "" + view_width + " " + view_height);
+			//Log.i("view_width view_height", "" + view_width + " " + view_height);
 			
 			kwh_array = new int[points.size()];
 			money_array = new int[points.size()];
@@ -1457,7 +1457,6 @@ public class FragmentEbppsLight extends Fragment
 			// TODO Auto-generated method stub
 			while(!Thread.currentThread().isInterrupted())  
 	        {  
-	            
 	            postInvalidate();   	//update ui 
 	        }  
 		}

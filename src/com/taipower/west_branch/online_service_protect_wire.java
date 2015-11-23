@@ -451,7 +451,7 @@ public class online_service_protect_wire extends Activity {
 			
 			try 
 			{
-				response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", params[2], HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
+				response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
 			} 
 			catch (IOException e) 
 			{

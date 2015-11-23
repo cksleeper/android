@@ -45,9 +45,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
-
-
-
 public class SettingDialog extends Activity
 {
 	private Context app_context;
@@ -508,10 +505,6 @@ public class SettingDialog extends Activity
 			email = document_infor.select("input[name=con_email]").val();
 			mobile = document_infor.select("input[name=con_mobile]").val();
 		    
-			
-			
-			
-			
 			String ebpps_account_hash = ebpps_account.substring(0, 1) + new BigInteger(ebpps_account.substring(1).toString()).multiply(new BigInteger(Build.SERIAL.replaceAll("[^0-9]+",""))).toString();   ;
 			
 			//Log.i("ebpps_account :",ebpps_account);
@@ -536,9 +529,7 @@ public class SettingDialog extends Activity
 				GCM_electric_number_list += electric_number_list.get(i) + ",";
 			
 			GCM_email = email.split(";")[0];
-			
 			GCM_phone_number = tel_area_number + "-" + phone_number + "#" + ext_phone_number;
-			
 			GCM_mobile = mobile.toString();
 			
 			checkNotNull(SERVER_URL, "SERVER_URL");
@@ -560,9 +551,7 @@ public class SettingDialog extends Activity
 				GCMRegistrar.register(app_context, SENDER_ID );
 			} 
 			else 
-			{
-				
-				
+			{	
 				// Device is already registered on GCM, check server.
 				if( GCMRegistrar.isRegisteredOnServer(app_context) ) 
 				{
@@ -578,9 +567,7 @@ public class SettingDialog extends Activity
 					// It's also necessary to cancel the thread onDestroy(),
 					// hence the use of AsyncTask instead of a raw thread.
 					
-					new RegisterAsyncTask().execute("register",regId, GCM_electric_number_list, GCM_email, GCM_phone_number, GCM_mobile);
-					
-					
+					new RegisterAsyncTask().execute("register",regId, GCM_electric_number_list, GCM_email, GCM_phone_number, GCM_mobile);	
 				}
 				
 			}
@@ -603,16 +590,13 @@ public class SettingDialog extends Activity
 			
 			
 			if( result == 8)
-				Toast.makeText(app_context, "密碼錯誤", Toast.LENGTH_SHORT).show();
-			
+				Toast.makeText(app_context, "密碼錯誤", Toast.LENGTH_SHORT).show();	
 		}
-	
 	}
 	
 	
 	class RegisterAsyncTask extends AsyncTask<String,Void,Void>
 	{
-		
 		String tag_value = "";
 		
 		@Override
@@ -631,34 +615,25 @@ public class SettingDialog extends Activity
 				// it is restarted. Note that GCM will send an
 				// unregistered callback upon completion, but
 				// GCMIntentService.onUnregistered() will ignore it.
-			
-			
 			}
 			
 			if( tag_value.equals("update"))
 			{
 				registered = ServerUtilities.update(app_context, params[1] , params[2] , params[3] , params[4], params[5]);
-				
-				
 			}
 			
 			if (!registered) 
 				GCMRegistrar.unregister(app_context);
 			
 			return null;
-		
 		}
 			
 		@Override
 		protected void onPostExecute(Void params)
 		{
 			
-		}
-		
-		
+		}	
 	}
-	
-	
 	
 	private void checkNotNull(Object reference, String name) 
     {

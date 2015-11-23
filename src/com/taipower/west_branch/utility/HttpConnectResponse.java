@@ -5,6 +5,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,6 +36,8 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+
 /*
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -169,44 +173,36 @@ public class HttpConnectResponse
 	 * 
 	 */
 	
-	public static byte[] onOpenConnection(String url_string,final String method,String parameters,boolean cookie_state,boolean http_redirect) throws IOException, URISyntaxException,SSLHandshakeException
+	public static byte[] onOpenConnection( String url_string, String method, String[] parameters, boolean cookie_state, boolean http_redirect) throws IOException, URISyntaxException,SSLHandshakeException
 	{
-		
 		if( cookieManager == null )
 		{	
 			cookieManager = new CookieManager();
 			CookieHandler.setDefault(cookieManager);
 		}
 		
-		
-		Object connection = null;
+		URLConnection connection = null;
 		boolean https_check = url_string.startsWith("https");
 		byte[] http_response = null;
-		
-		OutputStream output_stream = null;
 		
 		if(!cookie_state)
 			cookies = null;
 		
 		URL url = null;
 		
-		if( method.toUpperCase(Locale.ENGLISH).equals("POST") )
-		{
-			url = new URL(url_string);
-			//Log.i("Sending 'POST' request to URL : " , url_string);
-		}
-		else
+		method =  method.toUpperCase(Locale.US);
+		
+		if( !method.startsWith("POST") )
 		{	
 			if(parameters != null )
 			{
-				if(!parameters.equals(""))
+				if(!parameters.equals("") && !url_string.contains("?"))
 					url_string += "?" + parameters;
 			}
-				
-			url = new URL(url_string);
 			//Log.i("Sending 'GET' request to URL : " , url_string);
 		}
 		
+		url = new URL(url_string);
 		
 		if(https_check)
 		{	
@@ -257,7 +253,7 @@ public class HttpConnectResponse
 			//((URLConnection) connection).setRequestProperty("Accept-Encoding","gzip, deflate, sdch");
 			//((URLConnection) connection).setRequestProperty("Accept-Language","zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,ja;q=0.2");
 			
-			((URLConnection) connection).setRequestProperty("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.104 Safari/537.36");
+			((URLConnection) connection).setRequestProperty("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36");
 			
 			//((URLConnection) connection).setRequestProperty("Host","ebpps.taipower.com.tw");
 			//((URLConnection) connection).setRequestProperty("Origin","http://wapp.taipower.com.tw");
@@ -280,60 +276,126 @@ public class HttpConnectResponse
 		
 		//JDK HttpUrlConnection override getInputStream() method，urlConnection.getInputStream() connect();
 		
-		if( method.toUpperCase(Locale.ENGLISH).equals("POST") )
+		if( method.startsWith("POST") )
 		{
+			OutputStream output_stream = null;
+			DataOutputStream wr = null;
 			
-			//add request header
-			if(https_check)
-			{	
+			if( method.contains("FILE") )
+			{
+				final String BOUNDARY   = "==================================";
+				final String HYPHENS    = "--";
+				final String CRLF       = "\r\n";
 				
-				((HttpsURLConnection) connection).setRequestMethod("POST");
-				((HttpsURLConnection) connection).setReadTimeout(30000);
-				//send post request
-				((HttpsURLConnection) connection).setDoOutput(true);
-				((HttpsURLConnection) connection).setDoInput(true);
-				output_stream = ((HttpsURLConnection) connection).getOutputStream(); // connect
-			
+				if( https_check)
+				{	
+					((HttpsURLConnection) connection).setRequestMethod("POST");
+					((HttpsURLConnection) connection).setReadTimeout(30000);
+					//send post request
+					((HttpsURLConnection) connection).setDoOutput(true);
+					((HttpsURLConnection) connection).setDoInput(true);
+					((HttpsURLConnection) connection).setUseCaches(false);
+					((HttpsURLConnection) connection).setRequestProperty("Connection", "keep-alive");
+					((HttpsURLConnection) connection).setRequestProperty("Charset", "UTF-8");
+					// 把Content Type設為multipart/form-data
+					// 以及設定Boundary，Boundary很重要!
+					// 當你不只一個參數時，Boundary是用來區隔參數的  
+					((HttpsURLConnection) connection).setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
+					// 下面是開始寫參數
+					
+					output_stream = ((HttpsURLConnection) connection).getOutputStream(); // connect
+					
+					String file_name = parameters[1].split(",")[0];
+					String file_path = parameters[1].split(",")[1];
+					
+					String content_disposition = "Content-Disposition: form-data; name=\"image\"; filename=\"" + file_name + "\"";
+					String content_type = "Content-Type: image/jpeg";
+					
+					wr = new DataOutputStream(output_stream);
+					wr.writeBytes(HYPHENS + BOUNDARY + CRLF);       // 寫--==================================
+					wr.writeBytes(content_disposition + CRLF);  	// 寫(Disposition)
+					wr.writeBytes(content_type + CRLF);				// 寫(Content type)
+					wr.writeBytes(CRLF);       
+					
+					FileInputStream file_input_stream = new FileInputStream(new File(file_path));
+					wr.write( inputStreamToByteArray(file_input_stream));
+					wr.writeBytes(CRLF);
+					
+					for(String qq : parameters[0].split("&")  )
+					{
+						//Log.i("qq ",qq);
+						String[] qq_array = qq.split("=");
+						
+						if(qq_array.length > 1)
+						{
+							wr.writeBytes(HYPHENS + BOUNDARY + CRLF);       // 寫--==================================
+							wr.writeBytes("Content-Disposition: form-data; name=\"" + qq_array[0] + "\"" + CRLF);
+							wr.writeBytes(CRLF);
+							wr.writeBytes(qq_array[1]);
+							wr.writeBytes(CRLF);
+						}
+					}
+					
+					wr.writeBytes(HYPHENS + BOUNDARY + HYPHENS);    // (結束)寫--==================================--      
+					
+					file_input_stream.close();
+				}
+				else
+				{	
+					((HttpURLConnection) connection).setRequestMethod("POST");
+					((HttpURLConnection) connection).setReadTimeout(30000);
+					((HttpURLConnection) connection).setDoOutput(true);
+					((HttpURLConnection) connection).setDoInput(true);
+					((HttpURLConnection) connection).setUseCaches(false);
+					output_stream = ((HttpURLConnection) connection).getOutputStream();
+				}
+			}
+			else	
+			{
+				//add request header		
+				if(https_check)
+				{	
+					((HttpsURLConnection) connection).setRequestMethod("POST");
+					((HttpsURLConnection) connection).setReadTimeout(30000);
+					//send post request
+					((HttpsURLConnection) connection).setDoOutput(true);
+					((HttpsURLConnection) connection).setUseCaches(false);
+					output_stream = ((HttpsURLConnection) connection).getOutputStream(); // connect
+				}
+				else
+				{	
+					((HttpURLConnection) connection).setRequestMethod("POST");
+					((HttpURLConnection) connection).setReadTimeout(30000);
+					((HttpURLConnection) connection).setDoOutput(true);
+					((HttpURLConnection) connection).setUseCaches(false);
+					output_stream = ((HttpURLConnection) connection).getOutputStream();
+				}
 				
+				wr = new DataOutputStream(output_stream);
+				wr.writeBytes(parameters[0]);
 			}
-			else
-			{	
-				((HttpURLConnection) connection).setRequestMethod("POST");
-				((HttpURLConnection) connection).setReadTimeout(30000);
-				((HttpURLConnection) connection).setDoOutput(true);
-				((HttpURLConnection) connection).setDoInput(true);
-				output_stream = ((HttpURLConnection) connection).getOutputStream();
-			}
-			
 			
 			//connect.setDoInput(true); //for upload data
-			
-			DataOutputStream wr = new DataOutputStream(output_stream);
-			
 			//String parameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345"; //example
-			
-			wr.writeBytes(parameters);
+			//DataOutputStream wr = new DataOutputStream(output_stream);
+			//wr.writeBytes(parameters);
 			wr.flush();
 			wr.close();
 			
-			Log.i("Post parameters : " , parameters);
-			
+			//Log.i("Post parameters : " , parameters);
 		}
 		else
 		{
 			if(https_check)
 			{	
-				
 				((HttpsURLConnection) connection).setRequestMethod("GET");
 				((HttpsURLConnection) connection).setReadTimeout(120000);
 				//send post request
 				//((HttpsURLConnection) connection).setDoOutput(true);
 				((HttpsURLConnection) connection).connect();
-				
 			}
 			else
 			{	
-				
 				((HttpURLConnection) connection).setRequestMethod("GET");
 				((HttpURLConnection) connection).setReadTimeout(120000);
 				//((HttpURLConnection) connection).setDoOutput(true);
@@ -344,8 +406,6 @@ public class HttpConnectResponse
 		
 		Log.i("All fields :" ,((URLConnection) connection).getHeaderFields().toString() );
 		
-		
-		 
 		if( cookies == null )
 		{	
 			if(https_check)
@@ -356,32 +416,24 @@ public class HttpConnectResponse
 			//save cookie
 			//cookies_value = cookies;
 			
-			if( cookies != null )
-				Log.i("get Cookies : " , cookies);
-			
-			
+			//if( cookies != null )
+			//	Log.i("get Cookies : " , cookies);	
 		}
-		
-		
-		
 		
 		if(https_check)
 			CONNECTION_STATE_CODE = ((HttpsURLConnection) connection).getResponseCode();
 		else
 			CONNECTION_STATE_CODE = ((HttpURLConnection) connection).getResponseCode();
 		
-		
-		
 		Log.i("Response Code : " , String.valueOf(CONNECTION_STATE_CODE) );
 		
 		while(CONNECTION_STATE_CODE == 302 || CONNECTION_STATE_CODE == 301 || CONNECTION_STATE_CODE == 304)
 		{
-			
 			String redirect_url = ((URLConnection) connection).getHeaderField("Location");
 			redirect_url = url_string.substring(0,url_string.lastIndexOf("/") + 1 ) + redirect_url;
 			
 			url = new URL(redirect_url);
-			Log.i("Sending 'POST' request to URL : " , redirect_url);
+			//Log.i("Sending 'POST' request to URL : " , redirect_url);
 			
 			if(https_check)
 			{	
@@ -404,43 +456,19 @@ public class HttpConnectResponse
 					((HttpURLConnection) connection).setRequestProperty("Cookie",cookies);
 			}
 			
-			
 			if(https_check)
 				CONNECTION_STATE_CODE = ((HttpsURLConnection) connection).getResponseCode();
 			else
 				CONNECTION_STATE_CODE = ((HttpURLConnection) connection).getResponseCode();
 			
 			Log.i("Response Code : " ,String.valueOf( CONNECTION_STATE_CODE) );
-			
 		}	
 		
-		
 		if( CONNECTION_STATE_CODE == 200 )
-		{
-			
+		{	
 			InputStream input_stream = ((URLConnection) connection).getInputStream();
 			
-			http_response = inputStreamToByteArray(input_stream);
-			
-			/*
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(input_stream.available());
-			
-			byte[] buffer = new byte[512];
-			int count;
-		 
-			while ((count = input_stream.read(buffer)) != -1 )
-			{
-				bos.write(buffer, 0, count);
-			}
-		 
-			bos.flush();
-			bos.close();
-			input_stream.close();
-			
-			http_response = bos.toByteArray();
-			*/
-			
-			
+			http_response = inputStreamToByteArray(input_stream);	
 		}
 		else
 			return null;
@@ -469,7 +497,7 @@ public class HttpConnectResponse
 	}
 	
 	@SuppressLint("TrulyRandom")
-	private static HttpsURLConnection  disableCertificateALLHostName(HttpsURLConnection connection) throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException 
+	private static HttpsURLConnection disableCertificateALLHostName(HttpsURLConnection connection) throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException 
 	{
 		// Create a trust manager that does not validate certificate chains
 		TrustManager[] trustAllCerts = new TrustManager[] 

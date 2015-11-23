@@ -204,9 +204,6 @@ public class barcode_and_ebpps_factory extends Activity
 				origin_from = "barcode_factory";
         	}
 			
-			
-			
-			
 			Bundle barcode_data = new Bundle();
 			barcode_data.putString("electric_number",electric_number.getText().toString() );
 			//收費日

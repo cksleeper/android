@@ -482,7 +482,7 @@ public class FragmentOSBusinessId extends Fragment
 				if( session_tag.equals("refresh") )
 					response_data = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
 				else
-					response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", params[2], HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
 				
 				return_value = 0;
 			}  
