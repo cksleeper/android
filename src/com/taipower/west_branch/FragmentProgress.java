@@ -224,7 +224,7 @@ public class FragmentProgress extends Fragment
     						"nas=" + nas + "&" +
     						"nasno=" + nasno;
     			
-    			Log.i("paraments",paraments);
+    			//Log.i("paraments",paraments);
     			
     			}
     			catch (UnsupportedEncodingException e)
@@ -277,7 +277,6 @@ public class FragmentProgress extends Fragment
     					response_data = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
     				else
     					response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
-    				
     				
 					if( response_data == null)
 						return 9;

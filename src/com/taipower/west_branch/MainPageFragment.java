@@ -120,7 +120,7 @@ public class MainPageFragment extends Fragment
 		
 		dm = new DmInfor(app_activity, app_context);
 		
-		
+		/*
 		loading_webview = (WebView) findViewById(R.id.loading_webview);
 		loading_webview.setWebViewClient(new WebViewClient());
 		
@@ -144,7 +144,7 @@ public class MainPageFragment extends Fragment
 		
 		//loading_webview.setOnClickListener(on_click_listener);  //not working
 		//loading_webview.setOnTouchListener(on_touch_listener);
-		
+		*/
 		
 		new BackgroundAsyncTask().execute();		
 		
@@ -356,11 +356,17 @@ public class MainPageFragment extends Fragment
 				error_text_view.setGravity(Gravity.CENTER);
 				error_text_view.setText("網路發生問題！！\n請稍候再試！！");
 				
-				loading_webview.addView(error_text_view);
+				//loading_webview.addView(error_text_view);
+			
+				LinearLayout loading_layout = (LinearLayout) current_view.findViewById(R.id.loading_layout);
+				loading_layout.removeAllViews();
+				loading_layout.addView(error_text_view);
 			}
 			else
 			{
-				/*
+				
+				if( (System.currentTimeMillis() & 2)  == 0x0)
+				{
 				Thread task = new Thread(new Runnable()
 				{
 					@Override
@@ -368,11 +374,19 @@ public class MainPageFragment extends Fragment
 					{
 						// TODO Auto-generated method stub
 						final String[] laoding_data_array = laoding_data.split("\"");
-						final LinearLayout loading_layout = (LinearLayout) current_view.findViewById(R.id.laoding_layout);
-				
-						for(int i = 1 ; i < 100 ; i++)
+						//final LinearLayout loading_layout = (LinearLayout) current_view.findViewById(R.id.laoding_layout);
+						final ImageView loading_image_degree = (ImageView) current_view.findViewById(R.id.loading_degree);
+						final TextView loading_current_kw = (TextView) current_view.findViewById(R.id.loading_current_kw);
+						final TextView loading_evaluate_kw = (TextView) current_view.findViewById(R.id.loading_evaluate_kw);
+						final TextView loading_max_kw = (TextView) current_view.findViewById(R.id.loading_max_kw);
+						final TextView loading_rate = (TextView) current_view.findViewById(R.id.loading_rate);
+						
+						int loading_degree = (int) (Float.valueOf(laoding_data_array[1]) / Float.valueOf(laoding_data_array[3]) * 58.0f) ;
+						
+						for(int i = 1 ; i < loading_degree ; i++)
 						{
 							final int k = i;
+							
 							try 
 							{
 								Thread.sleep(100);
@@ -384,17 +398,20 @@ public class MainPageFragment extends Fragment
 									{
 										// TODO Auto-generated method stub
 										
-										if(loading_graphy != null)
-										{	
-											loading_layout.removeAllViews();
-											loading_graphy = null;
-										}
+										//if(loading_graphy != null)
+										//{	
+											//loading_layout.removeAllViews();
+											//loading_graphy = null;
+										//}
 									
-										String laoding = String.valueOf(Float.valueOf(laoding_data_array[1]) * ((float) k / 100.0f));
-								
-										loading_graphy = new LoadingGraphy( app_context, new String[]{"",laoding,"",laoding_data_array[3]});
-								
-										loading_layout.addView(loading_graphy);
+										//String laoding = String.valueOf(Float.valueOf(laoding_data_array[1]) * ((float) k / 100.0f));
+										//loading_graphy = new LoadingGraphy( app_context, new String[]{"",laoding,"",laoding_data_array[3]});
+										//loading_layout.addView(loading_graphy);
+										
+										loading_image_degree.setImageResource(R.drawable.loading_degree00 + k);
+										loading_current_kw.setText(String.format("%4.1f萬瓩",(Float.valueOf(laoding_data_array[1]) * (float)k  % 10000.0f)));
+										loading_evaluate_kw.setText(String.format("%4.1f萬瓩",(Float.valueOf(laoding_data_array[2]) * (float)k  % 10000.0f)));
+										loading_max_kw.setText(String.format("%4.1f萬瓩",(Float.valueOf(laoding_data_array[3]) * (float)k  % 10000.0f)));
 									}
 								});
 							} 
@@ -404,10 +421,58 @@ public class MainPageFragment extends Fragment
 								e.printStackTrace();
 							}
 						}
+						
+						app_activity.runOnUiThread(new Runnable()
+						{
+							@Override
+							public void run() 
+							{
+								// TODO Auto-generated method stub
+								loading_current_kw.setText(laoding_data_array[1] + "萬瓩");
+								loading_evaluate_kw.setText(laoding_data_array[2] + "萬瓩");
+								loading_max_kw.setText(laoding_data_array[3] + "萬瓩");
+								((TextView) current_view.findViewById(R.id.loading_time)).setText(laoding_data_array[4].replace("更新", ""));
+								loading_rate.setText(String.format("負載率%d%%",(int)((Float.valueOf(laoding_data_array[1]) / Float.valueOf(laoding_data_array[3]))*100)));
+							}
+						});
 					}
 				});
 				task.start();
-				*/
+				}
+				else
+				{
+					//loading_webview = (WebView) findViewById(R.id.loading_webview);
+					WebView loading_webview = new WebView(app_context);
+					loading_webview.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+					
+					loading_webview.setWebViewClient(new WebViewClient());
+					
+					int web_view_scale_rate = (int) (100.0f * ((float) dm.scale / 3.0f) * (7.0f/10.0f));
+					//Log.i("qq","" + dm.v_width + " "+ web_view_scale_rate );
+					
+					loading_webview.setInitialScale( web_view_scale_rate );
+					
+					loading_webview.getSettings().setJavaScriptEnabled(true);
+					loading_webview.getSettings().setLoadWithOverviewMode(true);
+					loading_webview.getSettings().setUseWideViewPort(true);
+					loading_webview.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
+					loading_webview.getSettings().setSupportMultipleWindows(false);
+					loading_webview.addJavascriptInterface(new MyJavaScriptInterface(), "HTML_OUT");
+					loading_webview.setWebViewClient(new WebViewClient()
+					{
+						
+					});
+					//loading_webview.loadUrl("http://www.taipower.com.tw/Meter/power_today_meter_adv.html");
+					loading_webview.loadUrl("file:///android_asset/loading_today.html");
+					
+					//loading_webview.setOnClickListener(on_click_listener);  //not working
+					//loading_webview.setOnTouchListener(on_touch_listener);
+					
+					LinearLayout loading_layout = (LinearLayout) current_view.findViewById(R.id.loading_layout);
+					loading_layout.removeAllViews();
+					loading_layout.addView(loading_webview);
+				}
+				
 			}
 		}
 	}
