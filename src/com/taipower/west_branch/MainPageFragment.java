@@ -70,7 +70,7 @@ public class MainPageFragment extends Fragment
 	private MainPageFragment this_class;
 	
 	private View current_view;
-	private WebView loading_webview;
+	
 	
 	private DmInfor dm;
 	
@@ -389,7 +389,7 @@ public class MainPageFragment extends Fragment
 							
 							try 
 							{
-								Thread.sleep(100);
+								Thread.sleep(50);
 								
 								app_activity.runOnUiThread(new Runnable()
 								{
@@ -409,9 +409,9 @@ public class MainPageFragment extends Fragment
 										//loading_layout.addView(loading_graphy);
 										
 										loading_image_degree.setImageResource(R.drawable.loading_degree00 + k);
-										loading_current_kw.setText(String.format("%4.1f萬瓩",(Float.valueOf(laoding_data_array[1]) * (float)k  % 10000.0f)));
-										loading_evaluate_kw.setText(String.format("%4.1f萬瓩",(Float.valueOf(laoding_data_array[2]) * (float)k  % 10000.0f)));
-										loading_max_kw.setText(String.format("%4.1f萬瓩",(Float.valueOf(laoding_data_array[3]) * (float)k  % 10000.0f)));
+										loading_current_kw.setText(String.format("%4.1f萬瓩",(Float.valueOf(laoding_data_array[1]) * (float)k % 10000)));
+										loading_evaluate_kw.setText(String.format("%4.1f萬瓩",(Float.valueOf(laoding_data_array[2]) * (float)k % 10000)));
+										loading_max_kw.setText(String.format("%4.1f萬瓩",(Float.valueOf(laoding_data_array[3]) * (float)k % 10000)));
 									}
 								});
 							} 

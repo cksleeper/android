@@ -23,6 +23,8 @@ import java.util.Locale;
 
 import javax.net.ssl.SSLHandshakeException;
 
+import org.jsoup.Jsoup;
+
 import com.google.android.gcm.GCMRegistrar;
 import com.taipower.west_branch.R;
 import com.taipower.west_branch.SettingDialog.RegisterAsyncTask;
@@ -316,9 +318,7 @@ public class FragmentSendEmailAboutMeter extends Fragment
     
     private View.OnClickListener button_on_click_listener = new View.OnClickListener()
     {
-    	
-    	
-		@Override
+    	@Override
 		public void onClick(View v) 
 		{
 			// TODO Auto-generated method stub
@@ -351,16 +351,14 @@ public class FragmentSendEmailAboutMeter extends Fragment
 			        File temp_photoFile = null;
 					
 					//Log.i("after value is ",qq.getPackageName());
-					
+			        
 					try 
 			        {
-						temp_photoFile = createImageFile();
-			            
+						temp_photoFile = createImageFile();    
 			        } 
 			        catch (IOException e) 
 			        {
 			            e.getStackTrace();
-			        
 			        }
 			        // Continue only if the File was successfully created
 			        if (temp_photoFile != null) 
@@ -535,15 +533,12 @@ public class FragmentSendEmailAboutMeter extends Fragment
 						final_bill_email_array_list.remove("7111@mail.water.gov.tw");
 					}
 					
-					final String reg_id = GCMRegistrar.getRegistrationId(app_context);
-					
 					final String email_content = "地址: " + city_array[city_selected_index] + distr_array[distr_selected_index] + used_address + "\n\n" + 
 								    electric_content + water_content +
 							  	    "申請人: " + apply_user + "\n" +
 							  	    "連絡電話: " + tel_area_number + "-" + phone_number + "#" + ext_phone_number + "\n" +
 							  	    "行動電話: " + mobile + "\n" +
-									"備註: "    + note_board + "\n" +
-									reg_id;
+									"備註: "    + note_board + "\n";
 					
 					final String[] email_address = final_bill_email_array_list.toArray(new String[final_bill_email_array_list.size()]);
 					
@@ -563,7 +558,6 @@ public class FragmentSendEmailAboutMeter extends Fragment
 		        	LinearLayout additional_layout = new LinearLayout(app_context);
 		        	additional_layout.addView(additional_message0);
 		        	additional_layout.setOrientation(LinearLayout.VERTICAL);
-		        	
 		        	
 		        	if(email_index != no_meter_read)
 		        		additional_layout.addView(additional_message1);
@@ -618,10 +612,12 @@ public class FragmentSendEmailAboutMeter extends Fragment
         		        	
         		        	for(String qq : attach_file)	
         		        		qq = null;
-        		        	
         		        	/*
+        		        	final String reg_id = GCMRegistrar.getRegistrationId(app_context);
+        		        	
+        		        	Log.i("reg_id",reg_id);
         		        	String url = "https://cksleeper.dlinkddns.com/get_image.php";
-        					
+        		        	
         		        	String params ="";
         		        	try 
         		        	{
@@ -644,8 +640,8 @@ public class FragmentSendEmailAboutMeter extends Fragment
         		        	
         		        	String file_name_path = "gallery" + "," + browser_picture_location.replace("file://", "");
         		        	
-        		        	//new DoInBackgroundAsyncTask().execute(url,params,file_name_path);
-        		        	 */
+        		        	new DoInBackgroundAsyncTask().execute(url,params,file_name_path);
+        		        	*/
 						}
 					});
 		        	alert_dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -922,7 +918,7 @@ public class FragmentSendEmailAboutMeter extends Fragment
     		super.onPreExecute();	
     	}
     	
-    	byte[] response_data ;
+    	byte[] response_data = null;
     	int return_value;
     	
 		@Override
@@ -939,7 +935,8 @@ public class FragmentSendEmailAboutMeter extends Fragment
 			{
 				response_data = HttpConnectResponse.onOpenConnection(params[0], "POST_FILE", parameters, HttpConnectResponse.COOKIE_CLEAR, HttpConnectResponse.HTTP_NONREDIRECT);
 				
-				return_value = 0;
+				if( response_data != null )
+					return_value = 0;
 			} 
 			catch (SSLHandshakeException e) 
 			{
@@ -977,8 +974,37 @@ public class FragmentSendEmailAboutMeter extends Fragment
         {
 			String response = "";
 			try 
-			{
-				response = new String(response_data,"utf-8");
+			{	
+				if(result.intValue() == 0)
+				{
+					//Log.i("upload","successful");
+					response = new String(response_data,"utf-8");
+					Log.i("response", response);
+					/*
+					AlertDialog.Builder response_dialog = new AlertDialog.Builder(app_context); 
+					
+					if( response.split(",")[0].equals("OK") )
+					{	
+						String number = response.split(",")[1];
+						
+						response_dialog.setTitle("收件成功");
+						response_dialog.setMessage(String.format("您的收件號碼為NO.%s,如有任何問題請跟們聯絡",number));
+					}
+					else
+					{
+						response_dialog.setTitle("收件失敗");
+						response_dialog.setMessage("您的案件傳送失敗,請跟們聯絡！！");
+					}
+					
+					response_dialog.setPositiveButton("OK", null);
+					response_dialog.show();
+					*/
+				}
+				else
+				{
+					Log.i("upload","unsuccessful");
+				}
+				
 			} 
 			catch (UnsupportedEncodingException e) 
 			{
@@ -986,16 +1012,9 @@ public class FragmentSendEmailAboutMeter extends Fragment
 				e.printStackTrace();
 			}
 			
-			Log.i("response", response);
 			
-			if(result.intValue() == 0)
-			{
-				Log.i("upload","successful");
-			}
-			else
-			{
-				Log.i("upload","unsuccessful");
-			}
+			
+			
         }	
     }
     

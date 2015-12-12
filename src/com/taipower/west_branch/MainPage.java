@@ -299,7 +299,7 @@ public class MainPage extends Activity
 				// It's also necessary to cancel the thread onDestroy(),
 				// hence the use of AsyncTask instead of a raw thread.
 				
-				new RegisterAsyncTask().execute("register",reg_id);	
+				//new RegisterAsyncTask().execute("register",reg_id);	
 			}		
 		}
     }
@@ -316,7 +316,8 @@ public class MainPage extends Activity
 			if( tag_value.equals("register"))
 			{
 				//registered = ServerUtilities.register(app_context, params[1] , params[2] , params[3] , params[4], params[5]);
-				registered = ServerUtilities.register(app_context, params[1]);
+				//registered = ServerUtilities.register(app_context, params[1]);
+				
 				// At this point all attempts to register with the app
 				// server failed, so we need to unregister the device
 				// from GCM - the app will try to register again when
@@ -331,7 +332,7 @@ public class MainPage extends Activity
 			if( tag_value.equals("update"))
 			{
 				//registered = ServerUtilities.update(app_context, params[1] , params[2] , params[3] , params[4], params[5]);//
-				registered = ServerUtilities.register(app_context, params[1]);
+				//registered = ServerUtilities.register(app_context, params[1]);
 				
 				if(registered)
 					Log.i("GCM","registered");

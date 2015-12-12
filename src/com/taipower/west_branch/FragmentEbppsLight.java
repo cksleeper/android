@@ -26,16 +26,13 @@ import com.taipower.west_branch.utility.SHA1Util;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnKeyListener;
-import android.content.DialogInterface.OnShowListener;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -44,7 +41,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
@@ -58,7 +54,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -66,13 +61,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.FrameLayout;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -229,7 +221,7 @@ public class FragmentEbppsLight extends Fragment
 		        if( !ASaBuLuCheck.idCheck(ebpps_account) )
 					error_message += "電子帳單帳號填寫錯誤\n";
 				
-				if(ebpps_password.length() < 8 )
+				if(ebpps_password.length() < 7 )
 					error_message += "電子帳單密碼填寫錯誤";
 		        
 		        if(error_message.equals(""))

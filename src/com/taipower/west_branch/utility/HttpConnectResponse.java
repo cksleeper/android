@@ -253,7 +253,7 @@ public class HttpConnectResponse
 			//((URLConnection) connection).setRequestProperty("Accept-Encoding","gzip, deflate, sdch");
 			//((URLConnection) connection).setRequestProperty("Accept-Language","zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,ja;q=0.2");
 			
-			((URLConnection) connection).setRequestProperty("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36");
+			((URLConnection) connection).setRequestProperty("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36 CKSHttpConnect");
 			
 			//((URLConnection) connection).setRequestProperty("Host","ebpps.taipower.com.tw");
 			//((URLConnection) connection).setRequestProperty("Origin","http://wapp.taipower.com.tw");
@@ -312,9 +312,9 @@ public class HttpConnectResponse
 					String content_type = "Content-Type: image/jpeg";
 					
 					wr = new DataOutputStream(output_stream);
-					wr.writeBytes(HYPHENS + BOUNDARY + CRLF);       // 寫--==================================
-					wr.writeBytes(content_disposition + CRLF);  	// 寫(Disposition)
-					wr.writeBytes(content_type + CRLF);				// 寫(Content type)
+					wr.writeBytes(HYPHENS + BOUNDARY + CRLF);       // write down--==================================
+					wr.writeBytes(content_disposition + CRLF);  	// write down(Disposition)
+					wr.writeBytes(content_type + CRLF);				// write down(Content type)
 					wr.writeBytes(CRLF);       
 					
 					FileInputStream file_input_stream = new FileInputStream(new File(file_path));
@@ -328,7 +328,7 @@ public class HttpConnectResponse
 						
 						if(qq_array.length > 1)
 						{
-							wr.writeBytes(HYPHENS + BOUNDARY + CRLF);       // 寫--==================================
+							wr.writeBytes(HYPHENS + BOUNDARY + CRLF);       // write down--==================================
 							wr.writeBytes("Content-Disposition: form-data; name=\"" + qq_array[0] + "\"" + CRLF);
 							wr.writeBytes(CRLF);
 							wr.writeBytes(qq_array[1]);

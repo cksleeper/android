@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.taipower.west_branch"
-    android:versionCode="2015112615"
-    android:versionName="1.8.4">
+    android:versionCode="2015120212"
+    android:versionName="1.8.5">
 	
     <permission 
         android:name="taipower_west_branch_project.permission.MAPS_RECEIVE" 
@@ -55,7 +55,7 @@
     
 	
 	<permission android:name="com.taipower.west_branch.permission.C2D_MESSAGE" android:protectionLevel="signature" />
- 	
+ 	 
  	<!-- 使用GCM -->
 	<uses-permission android:name="com.taipower.west_branch.permission.C2D_MESSAGE" />
 	
