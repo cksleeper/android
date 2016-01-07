@@ -157,7 +157,6 @@ public class MainPageFragment extends Fragment
         
         Log.i("fragment class",fragment_tag);
         
-        
 		return current_view;
 	}
 	
@@ -364,22 +363,35 @@ public class MainPageFragment extends Fragment
 			}
 			else
 			{
+				final LinearLayout loading_layout = (LinearLayout) current_view.findViewById(R.id.loading_layout);
 				
 				if( (System.currentTimeMillis() & 2)  == 0x0)
 				{
 				Thread task = new Thread(new Runnable()
-				{
+				{	
 					@Override
 					public void run() 
 					{
 						// TODO Auto-generated method stub
 						final String[] laoding_data_array = laoding_data.split("\"");
-						//final LinearLayout loading_layout = (LinearLayout) current_view.findViewById(R.id.laoding_layout);
-						final ImageView loading_image_degree = (ImageView) current_view.findViewById(R.id.loading_degree);
-						final TextView loading_current_kw = (TextView) current_view.findViewById(R.id.loading_current_kw);
-						final TextView loading_evaluate_kw = (TextView) current_view.findViewById(R.id.loading_evaluate_kw);
-						final TextView loading_max_kw = (TextView) current_view.findViewById(R.id.loading_max_kw);
-						final TextView loading_rate = (TextView) current_view.findViewById(R.id.loading_rate);
+						
+						final LinearLayout loading_linear_layout = (LinearLayout) LayoutInflater.from(app_context).inflate(R.layout.main_page_fragment_loading_degree, null, false);
+						
+						app_activity.runOnUiThread(new Runnable()
+						{
+							@Override
+							public void run() 
+							{
+								// TODO Auto-generated method stub
+								loading_layout.addView(loading_linear_layout);
+							}
+						});
+						
+						final ImageView loading_image_degree = (ImageView) loading_linear_layout.findViewById(R.id.loading_degree);
+						final TextView loading_current_kw = (TextView) loading_linear_layout.findViewById(R.id.loading_current_kw);
+						final TextView loading_evaluate_kw = (TextView) loading_linear_layout.findViewById(R.id.loading_evaluate_kw);
+						final TextView loading_max_kw = (TextView) loading_linear_layout.findViewById(R.id.loading_max_kw);
+						final TextView loading_rate = (TextView) loading_linear_layout.findViewById(R.id.loading_rate);
 						
 						int loading_degree = (int) (Float.valueOf(laoding_data_array[1]) / Float.valueOf(laoding_data_array[3]) * 58.0f) ;
 						
@@ -389,7 +401,7 @@ public class MainPageFragment extends Fragment
 							
 							try 
 							{
-								Thread.sleep(50);
+								Thread.sleep(25);
 								
 								app_activity.runOnUiThread(new Runnable()
 								{
@@ -431,7 +443,7 @@ public class MainPageFragment extends Fragment
 								loading_current_kw.setText(laoding_data_array[1] + "萬瓩");
 								loading_evaluate_kw.setText(laoding_data_array[2] + "萬瓩");
 								loading_max_kw.setText(laoding_data_array[3] + "萬瓩");
-								((TextView) current_view.findViewById(R.id.loading_time)).setText(laoding_data_array[4].replace("更新", ""));
+								((TextView) loading_linear_layout.findViewById(R.id.loading_time)).setText(laoding_data_array[4].replace("更新", ""));
 								loading_rate.setText(String.format("負載率%d%%",(int)((Float.valueOf(laoding_data_array[1]) / Float.valueOf(laoding_data_array[3]))*100)));
 							}
 						});
@@ -468,7 +480,6 @@ public class MainPageFragment extends Fragment
 					//loading_webview.setOnClickListener(on_click_listener);  //not working
 					//loading_webview.setOnTouchListener(on_touch_listener);
 					
-					LinearLayout loading_layout = (LinearLayout) current_view.findViewById(R.id.loading_layout);
 					loading_layout.removeAllViews();
 					loading_layout.addView(loading_webview);
 				}

@@ -171,7 +171,6 @@ public class FragmentSendEmailAboutMeter extends Fragment
 		this.app_activity = this.getActivity();
 		this.this_class = this;
     	
-		
 		Bundle bundle = this_class.getArguments();
 		email_index = bundle.getInt("item");
 		
@@ -856,7 +855,6 @@ public class FragmentSendEmailAboutMeter extends Fragment
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) 
 		{
 			// TODO Auto-generated method stub
-			
     		if( parent.getId() == R.id.spinner_city )
 			{
 				//city_selected_index = (int ) id;

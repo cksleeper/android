@@ -27,7 +27,9 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -36,6 +38,10 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+
+
+
 
 
 /*
@@ -56,6 +62,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 */
 import com.google.api.client.util.IOUtils;
+
 
 import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
@@ -173,6 +180,244 @@ public class HttpConnectResponse
 	 * 
 	 */
 	
+	private CookieManager cookie_manager;
+	private String cookie_string;
+	private String url_string;
+	private String method;
+	private String[] parameters;
+	private boolean cookie_status;
+	private boolean redirect_status;
+	private HashMap<String,String> headers_map;
+	
+	public static final int HTTP_OK = HttpURLConnection.HTTP_OK;
+	public static final int HTTP_FORBIDDEN = HttpURLConnection.HTTP_FORBIDDEN;
+	public static final int HTTP_NOT_FOUND = HttpURLConnection.HTTP_NOT_FOUND;
+	public int HTTP_STATUS;
+	
+	public HttpConnectResponse()
+	{
+		if( cookie_manager == null )
+		{	
+			cookie_manager = new CookieManager();
+			CookieHandler.setDefault(cookie_manager);
+			Log.i("cookie_manager","set");
+		}
+	}
+	
+	public void setUrl(String url_string)
+	{
+		this.url_string = url_string;
+	}
+	
+	public void setConnectMethod(String method, String[] parameters)
+	{
+		this.method = method.toUpperCase(Locale.US);
+		
+		if( this.method.equals("GET")  )
+			this.parameters = null;
+		else
+			this.parameters = parameters;
+	}
+	
+	public void setConnectMethod(String method)
+	{
+		this.setConnectMethod(method, null);
+	}
+	
+	public void setCookieStatus(boolean cookie_status)
+	{
+		this.cookie_status = cookie_status;
+	}
+	
+	public void setRedirectStatus(boolean redirect_status)
+	{
+		this.redirect_status = redirect_status;
+	}
+	
+	public void setConnectionRequestProperty(String headers, String value)
+	{
+		if( headers_map != null )
+			headers_map = new HashMap<String,String>();
+		
+		this.headers_map.put(headers, value);
+	}
+	
+	public void setConnectionRequestProperty(HashMap<String ,String> headers_map)
+	{
+		this.headers_map = headers_map;
+	}
+	
+	public CookieManager getCookieManager()
+	{
+		return cookie_manager;
+	}
+	
+	public void setCookieManager(CookieManager cookie_manager)
+	{
+		this.cookie_manager = cookie_manager;
+	}
+	
+	public String getCookie()
+	{
+		return cookie_string;
+	}
+	
+	public void setCookie(String cookie)
+	{
+		if( cookie != null && cookie.length() > 0)
+		{
+			this.cookie_string = cookie;
+			this.cookie_status = true;
+		}
+		else
+		{
+			this.cookie_string = null;
+			this.cookie_status = false;
+		}
+	}
+	
+	public InputStream startConnectAndResponseInputStream() throws SSLHandshakeException, IOException, URISyntaxException
+	{	
+		if(!cookie_status)
+			cookie_string = null;
+		
+		URL url = new URL(url_string);
+		URLConnection connection;
+		
+		boolean https_check = url_string.startsWith("https");
+		
+		if( https_check )
+		{	
+			connection = disableCertificateALLHostName(((HttpsURLConnection) url.openConnection()));
+			((HttpsURLConnection) connection).setInstanceFollowRedirects(redirect_status); 
+		}
+		else	
+		{	
+			connection = (HttpURLConnection) url.openConnection();
+			((HttpURLConnection) connection).setInstanceFollowRedirects(redirect_status); 
+		}
+		
+		if( headers_map != null)
+		{	
+			Set<String> headers_set = headers_map.keySet();
+			for(String key : headers_set )
+			connection.setRequestProperty(key, headers_map.get(key));	
+		}
+		//((URLConnection) connection).setRequestProperty("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+		//((URLConnection) connection).setRequestProperty("Accept-Encoding","gzip, deflate, sdch");
+		//((URLConnection) connection).setRequestProperty("Accept-Language","zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,ja;q=0.2");	
+		//((URLConnection) connection).setRequestProperty("Host","ebpps.taipower.com.tw");
+		//((URLConnection) connection).setRequestProperty("Origin","http://wapp.taipower.com.tw");
+		//((URLConnection) connection).setRequestProperty("Referer","http://wapp.taipower.com.tw/naweb/apfiles/Nawp2J2.asp");
+		//((URLConnection) connection).setRequestProperty("Cache-Control","max-age=0");
+		//((URLConnection) connection).setRequestProperty("Connection","keep-alive");
+		connection.setRequestProperty("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36 CKSHttpConnect");
+		
+		if( cookie_string != null)
+		{	
+			connection.setRequestProperty("Cookie",cookie_string);
+			//Log.i("set cookie",cookie_string);
+		}
+		
+		//JDK HttpUrlConnection override getInputStream() method，urlConnection.getInputStream() connect();
+		
+		if( method.startsWith("POST") )
+		{
+			OutputStream output_stream = null;
+			DataOutputStream wr = null;
+					
+			//add request header		
+			if(https_check)
+				((HttpsURLConnection) connection).setRequestMethod("POST");
+			else
+				((HttpURLConnection) connection).setRequestMethod("POST");
+			
+			connection.setReadTimeout(30000);
+			//send post request
+			connection.setDoOutput(true);
+			connection.setUseCaches(false);
+			output_stream = connection.getOutputStream(); // connect
+			
+			wr = new DataOutputStream(output_stream);
+			wr.writeBytes(parameters[0]);
+					
+			//connect.setDoInput(true); //for upload data
+			//String parameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345"; //example
+			//DataOutputStream wr = new DataOutputStream(output_stream);
+			//wr.writeBytes(parameters);
+			wr.flush();
+			wr.close();
+					
+			//Log.i("Post parameters : " , parameters);
+		}
+		else
+		{
+			if(https_check)
+				((HttpsURLConnection) connection).setRequestMethod("GET");
+			else
+				((HttpURLConnection) connection).setRequestMethod("GET");
+		
+			connection.setReadTimeout(30000);
+			//send post request
+			connection.connect();
+		}
+		
+		if( cookie_string == null )
+		{	
+			cookie_string = connection.getHeaderField("Set-Cookie");
+			//save cookie
+			//cookies_value = cookies;
+			//if( cookie_string != null )
+			//	Log.i("get Cookies : " , cookie_string);	
+		}
+		
+		if(https_check)
+			HTTP_STATUS = ((HttpsURLConnection) connection).getResponseCode();
+		else
+			HTTP_STATUS = ((HttpURLConnection) connection).getResponseCode();
+		
+		Log.i("Response Code : " , String.valueOf(HTTP_STATUS) );
+		
+		while( (HTTP_STATUS >= HttpURLConnection.HTTP_MOVED_PERM) && (HTTP_STATUS <= HttpURLConnection.HTTP_NOT_MODIFIED) )
+		{
+			String redirect_url = connection.getHeaderField("Location");
+			redirect_url = url_string.substring(0,url_string.lastIndexOf("/") + 1 ) + redirect_url;
+			
+			url = new URL(redirect_url);
+			//Log.i("Sending 'POST' request to URL : " , redirect_url);
+			
+			connection = url.openConnection(); 
+			
+			if(https_check)	
+				((HttpsURLConnection) connection).setInstanceFollowRedirects(false); 
+			else	
+				((HttpURLConnection) connection).setInstanceFollowRedirects(false); 
+			
+			if( cookie_string != null)
+				connection.setRequestProperty("Cookie",cookie_string);
+			
+			if(https_check)
+				HTTP_STATUS = ((HttpsURLConnection) connection).getResponseCode();
+			else
+				HTTP_STATUS = ((HttpURLConnection) connection).getResponseCode();
+			
+			Log.i("Response Code : " ,String.valueOf( HTTP_STATUS) );
+		}	
+		
+		if( HTTP_STATUS == HttpURLConnection.HTTP_OK )
+		{	
+			return connection.getInputStream();
+		}
+		else
+			return null;
+	}
+	
+	public byte[] startConnectAndResponseByteArray() throws SSLHandshakeException, IOException, URISyntaxException
+	{
+		return inputStreamToByteArray(this.startConnectAndResponseInputStream());
+	}
+	
+	
 	public static byte[] onOpenConnection( String url_string, String method, String[] parameters, boolean cookie_state, boolean http_redirect) throws IOException, URISyntaxException,SSLHandshakeException
 	{
 		if( cookieManager == null )
@@ -208,25 +453,7 @@ public class HttpConnectResponse
 		{	
 			connection = (HttpsURLConnection) url.openConnection(); 
 			
-			try 
-			{
-				connection = disableCertificateALLHostName(((HttpsURLConnection) connection));
-			} 
-			catch (KeyManagementException e) 
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			catch (NoSuchAlgorithmException e) 
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			catch (NoSuchProviderException e) 
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			connection = disableCertificateALLHostName(((HttpsURLConnection) connection));
 			
 			if(http_redirect)
 				((HttpsURLConnection) connection).setInstanceFollowRedirects(false); 
@@ -497,7 +724,7 @@ public class HttpConnectResponse
 	}
 	
 	@SuppressLint("TrulyRandom")
-	private static HttpsURLConnection disableCertificateALLHostName(HttpsURLConnection connection) throws NoSuchAlgorithmException, KeyManagementException, NoSuchProviderException 
+	private static HttpsURLConnection disableCertificateALLHostName(HttpsURLConnection connection)
 	{
 		// Create a trust manager that does not validate certificate chains
 		TrustManager[] trustAllCerts = new TrustManager[] 
@@ -523,11 +750,26 @@ public class HttpConnectResponse
 			
 			}
 		};
-
+		
 		// Install the all-trusting trust manager
-		SSLContext sc = SSLContext.getInstance("SSL");
-		sc.init(null, trustAllCerts, null);
-		connection.setSSLSocketFactory(sc.getSocketFactory());
+		try
+		{
+			SSLContext sc = SSLContext.getInstance("SSL");
+			sc.init(null, trustAllCerts, null);
+			connection.setSSLSocketFactory(sc.getSocketFactory());
+		} 
+		catch (KeyManagementException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		catch (NoSuchAlgorithmException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 		
 		return connection;
 	}

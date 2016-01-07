@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.taipower.west_branch"
-    android:versionCode="2015120212"
-    android:versionName="1.8.5">
+    android:versionCode="2016010802"
+    android:versionName="1.9.0">
 	
     <permission 
         android:name="taipower_west_branch_project.permission.MAPS_RECEIVE" 
@@ -16,7 +16,7 @@
     
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
    
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CAMERA"/>
     
     <uses-feature 
         android:name="android.hardware.camera"
@@ -43,7 +43,6 @@
 	<uses-permission 
 	    android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"
 	    android:maxSdkVersion="23"/>
-	
 	
 	<!-- The following two permissions are not required to use Google Maps Android API v2, but are recommended. -->
 	<uses-permission 
@@ -110,13 +109,6 @@
         
         <activity 
             android:name="com.taipower.west_branch.MainPageFragment" 
-            android:screenOrientation="portrait"
-            ></activity>
-        
-       
-        
-        <activity
-            android:name="com.taipower.west_branch.english_main_menu" 
             android:screenOrientation="portrait">
         </activity>
         
@@ -172,7 +164,6 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden"></activity>
         
-        
         <activity 
             android:name="com.taipower.west_branch.send_email"
             android:screenOrientation="portrait"
@@ -191,9 +182,6 @@
         <activity 
             android:name="com.taipower.west_branch.FragmentMain"
             android:screenOrientation="portrait"></activity>
-        
-       
-        
         
         <service android:name="com.taipower.west_branch.RSSPullService"/>
         
@@ -217,12 +205,7 @@
 	  
     		<!-- GCM service -->
     		<service android:name="com.taipower.west_branch.GCMIntentService" />
-    		
-    		
-    		
-
-        
-        
+    		        
     </application>
 
 </manifest>

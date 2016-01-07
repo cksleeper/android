@@ -37,7 +37,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.taipower.west_branch.FragmentOSFinance.LoadingDataAsyncTask;
+
 import com.taipower.west_branch.utility.ASaBuLuCheck;
 import com.taipower.west_branch.utility.CreateLoadingDialog;
 import com.taipower.west_branch.utility.DmInfor;
@@ -322,7 +322,8 @@ public class FragmentOSMeterCheck extends Fragment
 		}
     };
     
-   
+   private HttpConnectResponse connection ;
+    
 	class LoadingDataAsyncTask extends AsyncTask<String, Integer, Integer> 
     {
     	protected void onPreExecute ()
@@ -345,12 +346,31 @@ public class FragmentOSMeterCheck extends Fragment
 			
 			int return_value = 0;
 			
+			if( connection == null )
+				connection = new HttpConnectResponse();
+			
 			try 
 			{
 				if( session_tag.equals("refresh") )
-					response_data = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
+				{	
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("GET", null);
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
+					//response_data = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
+				}
 				else
-					response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
+				{	
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("POST", new String[]{params[2]});
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
+					//response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
+				}
 			
 				return_value = 0;
 			} 
@@ -385,8 +405,7 @@ public class FragmentOSMeterCheck extends Fragment
 			
         	if( progress[0] == 0 )
         	{
-        	   	message = "資料傳送中";
-        			
+        	   	message = "資料傳送中";	
         		process_persent_pointr = CreateLoadingDialog.createLoadingDialog(app_context, message , CreateLoadingDialog.NON_DOWNLOAD_TAG , CreateLoadingDialog.NON_DOWNLOAD_TAG, CreateLoadingDialog.CANCELABLE);
         	}
         	       	
@@ -580,7 +599,6 @@ public class FragmentOSMeterCheck extends Fragment
 	    							"__VIEWSTATEGENERATOR=" + __VIEWSTATEGENERATOR + "&" +
 	    							"__PREVIOUSPAGE=" + __PREVIOUSPAGE + "&" +
 	    							"__EVENTVALIDATION=" + __EVENTVALIDATION + "&" +
-	    							
 	    							"Button1=" + URLEncoder.encode("確定送出", "UTF-8");     				
 					} 
 	    			catch (UnsupportedEncodingException e) 

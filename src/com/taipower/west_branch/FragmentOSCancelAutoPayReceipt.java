@@ -36,7 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.taipower.west_branch.FragmentOSCancelAutoPay.LoadingDataAsyncTask;
+
 import com.taipower.west_branch.utility.ASaBuLuCheck;
 import com.taipower.west_branch.utility.CreateLoadingDialog;
 import com.taipower.west_branch.utility.DmInfor;
@@ -329,8 +329,9 @@ public class FragmentOSCancelAutoPayReceipt extends Fragment
     	
     };
     
+    private HttpConnectResponse connection;
     
-	class LoadingDataAsyncTask extends AsyncTask<String, Integer, Integer> 
+	private class LoadingDataAsyncTask extends AsyncTask<String, Integer, Integer> 
     {
 		String session_tag= "";
 		
@@ -353,13 +354,32 @@ public class FragmentOSCancelAutoPayReceipt extends Fragment
 			
 			int return_value = 0;
 			
+			if( connection == null )
+				connection = new HttpConnectResponse();
+				
 			try 
 			{
 				if( session_tag.equals("refresh") )
-					response_data = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
+				{	
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("GET", null);
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
+					//response_data = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
+				}
 				else
-					response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
-			
+				{	
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("POST", new String[]{params[2]});
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
+					//response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
+				}
+				
 				return_value = 0;
 			} 
 			catch (URISyntaxException e) 

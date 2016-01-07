@@ -98,8 +98,8 @@ public class FragmentSecondLayerMenu extends Fragment
 			
 			title_bar_title = R.drawable.title_bar_contact_us;
 			
-			 ((ImageButton) findViewById(R.id.second_layer_service_map_button)).setOnClickListener(new View.OnClickListener() 
-			 {
+			((ImageButton) findViewById(R.id.second_layer_service_map_button)).setOnClickListener(new View.OnClickListener() 
+			{
 				@Override
 				public void onClick(View v) 
 				{
@@ -107,7 +107,7 @@ public class FragmentSecondLayerMenu extends Fragment
 					Fragment fragment = new FragmentServiceMap();
 					transaction.replace(R.id.fragment_content, fragment, "service_map").commit();
 				}
-			 });
+			});
 		}
 		else if(second_layer_tag.equals("online_service"))
 		{
@@ -148,7 +148,7 @@ public class FragmentSecondLayerMenu extends Fragment
 		
 		IconTextAdapter coustomer_adapter = new IconTextAdapter(app_context,android.R.layout.simple_list_item_1 ,item_title_array ,item_description_array);
 		
-		ListView second_layer_list_view  = (ListView) current_view.findViewById(R.id.second_layer_list_view);
+		ListView second_layer_list_view  = (ListView) findViewById(R.id.second_layer_list_view);
 		second_layer_list_view.setAdapter(coustomer_adapter);
 		second_layer_list_view.setTag(second_layer_tag);
 		second_layer_list_view.setOnItemClickListener(on_item_click_listener);
@@ -186,7 +186,6 @@ public class FragmentSecondLayerMenu extends Fragment
 			//Log.i("position","" + position);
 			
             convertView = app_activity.getLayoutInflater().inflate(R.layout.fragment_second_layer_item, parent, false);
-            
             
             TextView item_title_text_view = (TextView) convertView.findViewById(R.id.item_title);
             item_title_text_view.setText(item_title[position].toString());
@@ -229,14 +228,16 @@ public class FragmentSecondLayerMenu extends Fragment
 				
 				Intent intent = new Intent(android.content.Intent.ACTION_DIAL,Uri.parse(phone_number[position]));
 				app_activity.startActivity(intent);
-					
 			}	
 			else
 			{
 				String[] about_meter_fragment_tag = new String[]{"about_meter_final_bill","about_meter_no_read"};
 					
-				String[] progress_state_fragment_tag = new String[]{"progress_state_pay_state","progress_state_progress_state","progress_state_onpower"};
-				Fragment[] progress_state_fragment = new Fragment[]{new FragmentPayState(), new FragmentProgress(), new FragmentWebBrowser()};
+				//String[] progress_state_fragment_tag = new String[]{"progress_state_pay_state","progress_state_progress_state","progress_state_onpower"};
+				//Fragment[] progress_state_fragment = new Fragment[]{new FragmentPayState(), new FragmentProgress(), new FragmentWebBrowser()};
+				
+				String[] progress_state_fragment_tag = new String[]{"progress_state_pay_state","progress_state_progress_state","progress_state_einvoice"};
+				Fragment[] progress_state_fragment = new Fragment[]{new FragmentPayState(), new FragmentProgress(), new FragmentEinvoice()};
 				
 				String[] online_service_fragment_tag = new String[]{"online_service_business_id","online_service_cancel_auto_pay",
 																	"online_service_cancel_auto_pay_receipt","online_service_commu_add","online_service_finance",
@@ -282,6 +283,7 @@ public class FragmentSecondLayerMenu extends Fragment
 					
 				if( tag.equals("progress_state") )
 				{
+					/*
 					if(position > 1)
 					{
 						String[] url_array = new String[]{"http://nds.taipower.com.tw/ndsweb/ndft112m.aspx",
@@ -294,9 +296,9 @@ public class FragmentSecondLayerMenu extends Fragment
 					if( position > 1)
 						position = 2;
 						
-					
+					*/
 					third_layer_fragment = progress_state_fragment[position];
-					third_layer_fragment.setArguments(bundle);
+					//third_layer_fragment.setArguments(bundle);
 					
 					fragment_tag = progress_state_fragment_tag[position];		
 					

@@ -258,7 +258,10 @@ public class FragmentPayState extends Fragment
 		}
 	};
 	
-	class LoadingDataAsyncTask extends AsyncTask<String, Integer, Integer>
+	private String cookie = null;
+	private HttpConnectResponse connection;
+	
+	private class LoadingDataAsyncTask extends AsyncTask<String, Integer, Integer>
 	{	
 		
 		@Override
@@ -273,6 +276,7 @@ public class FragmentPayState extends Fragment
 		String tag_value = "";
 		int http_response_code = 0;
 		
+		
 		@Override
 		protected Integer doInBackground(String... params) 
 		{
@@ -280,50 +284,87 @@ public class FragmentPayState extends Fragment
 			this.publishProgress(0);
 			Integer return_value = null ;
 			
-    		if (  ASaBuLuCheck.isOnline(app_activity) )
+    		if( ASaBuLuCheck.isOnline(app_activity) )
     		{
 			
 			tag_value = params[0];			
 			
 			try 
 			{
+				if(connection == null )
+					connection = new HttpConnectResponse();
+				
 				if( tag_value.equals("check_code"))
 				{	
 					//Server is had update connection limit at 1 second
 					//wait 5 seconds to connect
 					
-					response_data_content = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_CLEAR,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("GET", null);
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data_content = connection.startConnectAndResponseByteArray();
+					//cookie = connection.getCookie();
+					
+					//response_data_content = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_CLEAR,HttpConnectResponse.HTTP_NONREDIRECT ) ;
 					
 					Thread.sleep(1500l);
 					
-					response_data = HttpConnectResponse.onOpenConnection(params[2], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+					connection.setUrl(params[2]);
+					connection.setConnectMethod("GET", null);
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
+					//response_data = HttpConnectResponse.onOpenConnection(params[2], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
 					
 					return_value = 1;
 				}
 				
 				if( tag_value.equals("send") )
 				{	
-					response_data = HttpConnectResponse.onOpenConnection( params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("POST", new String[]{params[2]});
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
+					//response_data = HttpConnectResponse.onOpenConnection( params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
 					
 					return_value = 2;
 				}
 				
 				if( tag_value.equals("show_money0") )
 				{	
-					response_data_content = HttpConnectResponse.onOpenConnection( params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("GET", null);
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data_content = connection.startConnectAndResponseByteArray();
+					
+					//response_data_content = HttpConnectResponse.onOpenConnection( params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
 					
 					return_value = 5;
 				}
 				
 				if( tag_value.equals("show_money1") )
 				{	
-					response_data = HttpConnectResponse.onOpenConnection( params[1], "POST",new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("POST", new String[]{params[2]});
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
+					//response_data = HttpConnectResponse.onOpenConnection( params[1], "POST",new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
 					
 					return_value = 6;
 				}
 				
-				if( HttpConnectResponse.CONNECTION_STATE_CODE >= 400 && HttpConnectResponse.CONNECTION_STATE_CODE <= 404 )
+				if( connection.HTTP_STATUS >= HttpConnectResponse.HTTP_FORBIDDEN && connection.HTTP_STATUS <= HttpConnectResponse.HTTP_NOT_FOUND )
 					return_value = 404;
+				//if( HttpConnectResponse.CONNECTION_STATE_CODE >= 400 && HttpConnectResponse.CONNECTION_STATE_CODE <= 404 )
+				//	return_value = 404;
+				
 			} 
 			catch (InterruptedException e) 
 			{
@@ -356,7 +397,6 @@ public class FragmentPayState extends Fragment
 		
 		Dialog process_persent_pointr = null;
 		
-		
 		@Override
 		protected void onProgressUpdate(Integer... values) 
 		{
@@ -369,12 +409,9 @@ public class FragmentPayState extends Fragment
 		        
 				if( process_persent_pointr == null )
 		        	process_persent_pointr = CreateLoadingDialog.createLoadingDialog(app_context, message , CreateLoadingDialog.NON_DOWNLOAD_TAG , CreateLoadingDialog.NON_DOWNLOAD_TAG, CreateLoadingDialog.CANCELABLE);
-				
 		    } 
 		}
-		
-		
-		
+				
 		@Override
 		protected void onPostExecute(Integer result) 
 		{

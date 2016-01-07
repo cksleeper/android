@@ -359,26 +359,27 @@ public class FragmentEbppsLight extends Fragment
 	
 	//CookieStore cookieStore_globe = null;
 	
-	String logout_seeion_id = "";
+	private String logout_seeion_id = "";
 	
 	//List<Cookie> cookie_list ;
 	
-	ArrayList<String> result_array_list ;
-	ArrayList<String> result_array_electric_list ;
-	ArrayList<String> detail_result_array_list ;
-	ArrayList<String> detail_check_code_array_list;
+	private ArrayList<String> result_array_list ;
+	private ArrayList<String> result_array_electric_list ;
+	private ArrayList<String> detail_result_array_list ;
+	private ArrayList<String> detail_check_code_array_list;
 	
-	HashMap<String,String> history_data_url_map;
-	HashMap<String,String> history_data_detail_map;
+	private HashMap<String,String> history_data_url_map;
+	private HashMap<String,String> history_data_detail_map;
 	
-	HashMap<String,String> pdf_location_map;
-	HashMap<String,String> pdf_pay_date_map;
-	HashMap<String,String> pdf_payment_map;
+	private HashMap<String,String> pdf_location_map;
+	private HashMap<String,String> pdf_pay_date_map;
+	private HashMap<String,String> pdf_payment_map;
 	
-	HashMap<String,String> bill_detail_url_map ;
+	private HashMap<String,String> bill_detail_url_map ;
 	
+	private HttpConnectResponse connection;
 	
-	class LoadingDataAsyncTask extends AsyncTask<String, Integer, Integer> 
+	private class LoadingDataAsyncTask extends AsyncTask<String, Integer, Integer> 
     {	
 		@Override
 		protected void onPreExecute ()
@@ -407,6 +408,9 @@ public class FragmentEbppsLight extends Fragment
 						
 			session_tag = params[0];
 			
+			if( connection == null )
+				connection = new HttpConnectResponse();
+			
 			try
 			{
 				if( session_tag.startsWith("read_detail") || session_tag.startsWith("read_history_tag"))
@@ -414,8 +418,14 @@ public class FragmentEbppsLight extends Fragment
 					publishProgress(3);
 								
 					//response_data = HttpConnectResponse.apacheConnection(params[1], "get", null, HTTP.ASCII , HttpConnectResponse.COOKIE_KEEP);
-					response_data = HttpConnectResponse.onOpenConnection(params[1], "get", null, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
+					//response_data = HttpConnectResponse.onOpenConnection(params[1], "get", null, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
         			
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("GET", null);
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
 					return_value = 0;
 				}
 			
@@ -425,8 +435,14 @@ public class FragmentEbppsLight extends Fragment
 					publishProgress(2);
 								
 					//response_data = HttpConnectResponse.apacheConnection(params[1], "get", null, HTTP.ASCII , HttpConnectResponse.COOKIE_KEEP);
-					response_data = HttpConnectResponse.onOpenConnection(params[1], "get", null, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
+					//response_data = HttpConnectResponse.onOpenConnection(params[1], "get", null, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
         			
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("GET", null);
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
 	                pdf_name = params[2] + ".pdf"; 
 					
 	                return_value = 0;
@@ -440,7 +456,6 @@ public class FragmentEbppsLight extends Fragment
 					//HttpConnectResponse.apacheConnection(params[1], "get", null, HTTP.ASCII , HttpConnectResponse.COOKIE_KEEP);
 					HttpConnectResponse.onOpenConnection(params[1], "get", null, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
 					
-					
 					return_value = 0;
 				}
 			
@@ -449,8 +464,14 @@ public class FragmentEbppsLight extends Fragment
 					publishProgress(0);
 				    
 					//response_data = HttpConnectResponse.apacheConnection(params[1], "get", null, HTTP.ASCII , HttpConnectResponse.COOKIE_KEEP);
-					response_data = HttpConnectResponse.onOpenConnection(params[1], "get", null, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
+					//response_data = HttpConnectResponse.onOpenConnection(params[1], "get", null, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
         			
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("GET", null);
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
         			Document lgoin_account_check = Jsoup.parse(new String(response_data,"UTF-8"));
         			
         			Element error_alert_javascript = lgoin_account_check.select("script").last();
@@ -464,8 +485,14 @@ public class FragmentEbppsLight extends Fragment
         			else
         			{
         				//response_data = HttpConnectResponse.apacheConnection(params[2], "get", null, HTTP.ASCII , HttpConnectResponse.COOKIE_KEEP);
-        				response_data = HttpConnectResponse.onOpenConnection(params[2], "get", null, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
+        				//response_data = HttpConnectResponse.onOpenConnection(params[2], "get", null, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
             			
+        				connection.setUrl(params[2]);
+    					connection.setConnectMethod("GET", null);
+    					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+    					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+    					response_data = connection.startConnectAndResponseByteArray();
+        				
         				String login_content = new String(response_data, "UTF-8");
         				
 	            		Document login_layer1 = Jsoup.parse(login_content);

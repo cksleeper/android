@@ -11,57 +11,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import com.taipower.west_branch.R;
-import com.taipower.west_branch.FragmentOSCommuAdd.LoadingDataAsyncTask;
 import com.taipower.west_branch.utility.ASaBuLuCheck;
 import com.taipower.west_branch.utility.CreateLoadingDialog;
 import com.taipower.west_branch.utility.DmInfor;
 import com.taipower.west_branch.utility.HttpConnectResponse;
-import com.taipower.west_branch.utility.NoTitleBar;
 import com.taipower.west_branch.utility.PerferenceDialog;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -88,7 +47,6 @@ import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
@@ -453,8 +411,9 @@ public class FragmentOSBusinessId extends Fragment
 		}
     };
     
+    private HttpConnectResponse connection;
     
-	class LoadingDataAsyncTask extends AsyncTask<String, Integer, Integer> 
+	private class LoadingDataAsyncTask extends AsyncTask<String, Integer, Integer> 
     {
 		
 		protected void onPreExecute ()
@@ -477,12 +436,31 @@ public class FragmentOSBusinessId extends Fragment
 			
 			Integer return_value = null;
 			
+			if( connection == null )
+				connection = new HttpConnectResponse();
+				
 			try 
 			{
 				if( session_tag.equals("refresh") )
-					response_data = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
+				{	
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("GET", null);
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
+					//response_data = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
+				}
 				else
-					response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT);
+				{	
+					connection.setUrl(params[1]);
+					connection.setConnectMethod("POST", new String[]{params[2]});
+					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+					response_data = connection.startConnectAndResponseByteArray();
+					
+					//response_data = HttpConnectResponse.onOpenConnection(params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_REDIRECT);
+				}
 				
 				return_value = 0;
 			}  
