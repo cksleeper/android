@@ -91,6 +91,7 @@ public class MainPageFragment extends Fragment
 		
 		ImageButton title_bar_menu_button = (ImageButton) findViewById(R.id.title_bar_menu_button);
 		title_bar_menu_button.setBackgroundResource(R.drawable.title_bar_menu_button);
+		title_bar_menu_button.setVisibility(View.INVISIBLE);
 		
 		ImageButton title_bar_back_button = (ImageButton) findViewById(R.id.title_bar_back_button);
 		title_bar_back_button.setBackgroundResource(R.drawable.title_bar_back_button);

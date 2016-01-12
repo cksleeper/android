@@ -185,6 +185,7 @@ public class HttpConnectResponse
 	private String url_string;
 	private String method;
 	private String[] parameters;
+	private boolean disable_ssl_status = true;;
 	private boolean cookie_status;
 	private boolean redirect_status;
 	private HashMap<String,String> headers_map;
@@ -222,6 +223,11 @@ public class HttpConnectResponse
 	public void setConnectMethod(String method)
 	{
 		this.setConnectMethod(method, null);
+	}
+	
+	public void disableCertificate(boolean disable_ssl_status)
+	{
+		this.disable_ssl_status = disable_ssl_status;
 	}
 	
 	public void setCookieStatus(boolean cookie_status)
@@ -288,7 +294,11 @@ public class HttpConnectResponse
 		
 		if( https_check )
 		{	
-			connection = disableCertificateALLHostName(((HttpsURLConnection) url.openConnection()));
+			if(disable_ssl_status)
+				connection = disableCertificateALLHostName(((HttpsURLConnection) url.openConnection()));
+			else
+				connection = (HttpsURLConnection) url.openConnection();
+			
 			((HttpsURLConnection) connection).setInstanceFollowRedirects(redirect_status); 
 		}
 		else	

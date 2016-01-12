@@ -2,6 +2,7 @@ package com.taipower.west_branch;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.taipower.west_branch.utility.ASaBuLuCheck;
 import com.taipower.west_branch.utility.CreateLoadingDialog;
 
 import android.app.Activity;
@@ -42,6 +43,7 @@ public class FragmentEinvoice extends Fragment
 	
 	private WebView webview;
 	
+	private static final String ACTION_SCAN = "com.google.zxing.client.android.SCAN"; 
 	
 	public View onCreateView(LayoutInflater inflater,ViewGroup container,Bundle savedInstanceState) 
 	{
@@ -78,8 +80,13 @@ public class FragmentEinvoice extends Fragment
 			public void onClick(View v) 
 			{
 				// TODO Auto-generated method stub
-				IntentIntegrator scan_intent = new IntentIntegrator(this_class);
-				scan_intent.initiateScan();
+				//IntentIntegrator scan_intent = new IntentIntegrator(this_class);
+				//scan_intent.initiateScan();
+				
+				Intent intent = new Intent(ACTION_SCAN);  
+				intent.putExtra("SCAN_MODE", "ONE_D_MODE"); //一維條碼模式
+				
+				this_class.startActivityForResult(intent, 0);  
 			}
 		});
 		
@@ -141,34 +148,44 @@ public class FragmentEinvoice extends Fragment
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) 
 	{
+		Log.i("requestCode","" + requestCode);
 		super.onActivityResult(requestCode, resultCode, intent);
+		
+		
 		
 		if( intent != null  )
 		{
 		//retrieve scan result
-		IntentResult scanning_result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+		//IntentResult scanning_result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
 		
 		//Log.i("content",scanning_result.getContents());
 		//Log.i("format",scanning_result.getFormatName());
 		//we have a result
-		String barcode_result = scanning_result.getContents();
-		String barcode_format = scanning_result.getFormatName();
+		//String barcode_result = scanning_result.getContents();
+		//String barcode_format = scanning_result.getFormatName();
+		
+		String barcode_result = intent.getStringExtra("SCAN_RESULT"); //掃描結果  
+	    String barcode_format = intent.getStringExtra("SCAN_RESULT_FORMAT");//掃描格式  
 		
 		
-		if (scanning_result != null)
-		{
+		//if (scanning_result != null)
+		if( barcode_result != null )
+	    {
 			String error_message = "";
 			
 			if(!barcode_format.startsWith("CODE_128"))
 				error_message += "條碼格式錯誤\n";
 			
 			if( barcode_result.length() != 30 || !barcode_result.substring(5, 7).equals("BB"))
-				error_message += "非台電公司電子發票條碼";
+				error_message += "非台電公司電子發票條碼\n";
 			else
 			{
 				String[] side_array = new String[]{"N","C","S","X","Y","Z","E"};
-				String side = scanning_result.getContents().substring(7,8);
+				String side = barcode_result.substring(7,8);
 				
+				if( !ASaBuLuCheck.electricCheckFunction(barcode_result.substring(19))  )
+					error_message += "檢核碼錯誤\n";
+					
 				boolean check = false;
 				
 				for(String qq : side_array)
@@ -190,8 +207,9 @@ public class FragmentEinvoice extends Fragment
 				Log.i("barcode_result",barcode_result.substring(5, 15));
 				Log.i("barcode_result",barcode_result.substring(15, barcode_result.length()) );
 				
-				webview.loadUrl("javascript:document.getElementById('MainContent_VNum_1').value=" + barcode_result.substring(0, 5).toString() + ";");
+				//webview.loadUrl("javascript:document.getElementById('MainContent_VNum_1').value=" + barcode_result.substring(0, 5).toString() + ";");
 				
+				webview.evaluateJavascript("javascript:document.getElementById('MainContent_VNum_1').value='" + barcode_result.substring(0, 5).toString() + "';", null);
 				webview.evaluateJavascript("javascript:document.getElementById('MainContent_VNum_2').value='" + barcode_result.substring(5, 15).toString() + "';", null);
 				webview.evaluateJavascript("javascript:document.getElementById('MainContent_VNum_3').value='" + barcode_result.substring(15, barcode_result.length()) + "';", null);
 				

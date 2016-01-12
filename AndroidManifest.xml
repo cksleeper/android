@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.taipower.west_branch"
-    android:versionCode="2016010802"
-    android:versionName="1.9.0">
+    android:versionCode="2016011213"
+    android:versionName="1.9.1">
 	
     <permission 
         android:name="taipower_west_branch_project.permission.MAPS_RECEIVE" 
@@ -88,7 +88,6 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" android:largeHeap="true">
         
-                    
         <!-- splash activity -->
         <activity
             android:name="com.taipower.west_branch.Splash" 
@@ -104,61 +103,36 @@
         <activity 
             android:name="com.taipower.west_branch.MainPage" 
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
-            ></activity>
+            android:windowSoftInputMode="adjustResize"></activity>
         
         <activity 
             android:name="com.taipower.west_branch.MainPageFragment" 
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"></activity>
         
          <activity 
             android:name="com.taipower.west_branch.setting_menu"
-            android:screenOrientation="portrait">
-        </activity>
-        
+            android:screenOrientation="portrait"></activity>
         
         <activity 
             android:name="com.taipower.west_branch.setting_apply_user"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden">
-        </activity>
+            android:windowSoftInputMode="stateHidden"></activity>
         
         <activity 
             android:name="com.taipower.west_branch.setting_notification_list"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden">
-        </activity>
-        
-        
-        
-        	
-        
-      
-        	
-       
-        	
-       
-        
-       
-	        
+            android:windowSoftInputMode="stateHidden"></activity>
         
         <activity 
             android:name="com.taipower.west_branch.SettingDialog"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden"></activity>
-        	
-        	
-        	
         
         <activity 
             android:name="com.taipower.west_branch.gcm_service"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden"></activity>
-        
-        
-        
-        
+         
         <activity 
             android:name="com.taipower.west_branch.remind"
             android:screenOrientation="portrait"
@@ -168,7 +142,6 @@
             android:name="com.taipower.west_branch.send_email"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden"></activity>
-     
         
          <activity 
             android:name="com.taipower.west_branch.send_email_now_state"
@@ -205,7 +178,31 @@
 	  
     		<!-- GCM service -->
     		<service android:name="com.taipower.west_branch.GCMIntentService" />
-    		        
+   	
+   		<activity 
+   	    	  android:name="com.google.zxing.client.android.CaptureActivity"
+   	          android:configChanges="orientation|keyboardHidden" 
+	    	  android:screenOrientation="landscape" 
+	    	  android:theme="@android:style/Theme.NoTitleBar.Fullscreen" 
+	    	  android:windowSoftInputMode="stateAlwaysHidden">  
+            <intent-filter>  
+                <action android:name="android.intent.action.MAIN">  
+                </action>  
+  
+                <category android:name="android.intent.category.DEFAULT">  
+                </category>  
+            </intent-filter>  
+            <intent-filter>  
+                <action android:name="com.google.zxing.client.android.SCAN">  
+                </action>  
+  
+                <category android:name="android.intent.category.DEFAULT">  
+                </category>  
+            </intent-filter>  
+        </activity>  
+    		
     </application>
-
+	
+    
+    
 </manifest>
