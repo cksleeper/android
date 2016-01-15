@@ -153,12 +153,14 @@ public class FragmentPayState extends Fragment
         //url_content = "http://wapp10.taipower.com.tw/eq2/nawp300_mobile.aspx";
         url_content = "http://wapp10.taipower.com.tw/eq2/nawp300.aspx";
         
-        //check code send 
-        //function refreshCAPTCHA()
-        //{
-        //var d = new Date().getMilliseconds();
-        //$("#captcha").attr("src","code.aspx?d=" + d);
+        /*
+        check code send 
+        function refreshCAPTCHA()
+        {
+        	var d = new Date().getMilliseconds();
+        	$("#captcha").attr("src","code.aspx?d=" + d);
 		//}
+        */
         
         url_code = "http://wapp10.taipower.com.tw/eq2/code.aspx?d=" ;
         
@@ -263,7 +265,6 @@ public class FragmentPayState extends Fragment
 	
 	private class LoadingDataAsyncTask extends AsyncTask<String, Integer, Integer>
 	{	
-		
 		@Override
 		protected void onPreExecute ()
     	{

@@ -422,6 +422,7 @@ public class FragmentEbppsLight extends Fragment
         			
 					connection.setUrl(params[1]);
 					connection.setConnectMethod("GET", null);
+					connection.disableCertificate(true);
 					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
 					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
 					response_data = connection.startConnectAndResponseByteArray();
@@ -439,6 +440,7 @@ public class FragmentEbppsLight extends Fragment
         			
 					connection.setUrl(params[1]);
 					connection.setConnectMethod("GET", null);
+					connection.disableCertificate(true);
 					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
 					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
 					response_data = connection.startConnectAndResponseByteArray();
@@ -468,6 +470,7 @@ public class FragmentEbppsLight extends Fragment
         			
 					connection.setUrl(params[1]);
 					connection.setConnectMethod("GET", null);
+					connection.disableCertificate(true);
 					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
 					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
 					response_data = connection.startConnectAndResponseByteArray();
@@ -489,6 +492,7 @@ public class FragmentEbppsLight extends Fragment
             			
         				connection.setUrl(params[2]);
     					connection.setConnectMethod("GET", null);
+    					connection.disableCertificate(true);
     					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
     					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
     					response_data = connection.startConnectAndResponseByteArray();
