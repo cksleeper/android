@@ -458,7 +458,7 @@ public class HttpConnectResponse
 		{	
 			cookies = null;
 			cookie_string_list = null;	
-			Log.i("cookie","clear cookie");
+			//Log.i("cookie","clear cookie");
 		}
 		
 		URL url = null;
@@ -539,7 +539,7 @@ public class HttpConnectResponse
 			cookie += "path=/; HttpOnly";
 			
 			connection.setRequestProperty("Cookie",cookie);
-			Log.i("set Cookie : ", cookie ) ;
+			//Log.i("set Cookie : ", cookie ) ;
 		}
 		
 		
@@ -694,23 +694,26 @@ public class HttpConnectResponse
 			if( connection.getHeaderField("Set-Cookie") != null && connection.getHeaderField("Set-Cookie").contains(";") )
 				cookie_string_list.add(connection.getHeaderField("Set-Cookie").split(";")[0]);
 			
-			Log.i("add new cookie : ", cookie_string_list.toString());
+			//Log.i("add new cookie : ", cookie_string_list.toString());
 		}	
 		
 		String cookie_temp = connection.getHeaderField("Set-Cookie");
 			
 		if( cookie_temp != null && !cookie_string_list.contains(cookie_temp.split(";")[0]))
 		{
-			Log.i("temp cookie",cookie_temp);
+			//Log.i("temp cookie",cookie_temp);
 			cookie_string_list.add(cookie_temp.split(";")[0]);
 			
 			//cookie_string_list.add("__utma=4361142.1055650384.1421299797.1434792678.1434938224.71");
 			//cookie_string_list.add("style=Small Text");
 			//cookie_string_list.add("_ga=GA1.3.1055650384.1421299797");
-			Log.i("add new cookie : " , cookie_string_list.toString());
+			
+			//Log.i("add new cookie : " , cookie_string_list.toString());
 		}
 		else
-			Log.i("add new cookie : " , "cookie are the same ,not be to add");
+		{	
+			//Log.i("add new cookie : " , "cookie are the same ,not be to add");
+		}
 		
 		if(https_check)
 			CONNECTION_STATE_CODE = ((HttpsURLConnection) connection).getResponseCode();
@@ -725,7 +728,7 @@ public class HttpConnectResponse
 			redirect_url = url_string.substring(0,url_string.indexOf("/",8) ) + redirect_url;
 			
 			url = new URL(redirect_url);
-			Log.i("Sending 'GET' request to URL : " , redirect_url);
+			//Log.i("Sending 'GET' request to URL : " , redirect_url);
 			
 			if(https_check)
 			{	
@@ -758,7 +761,7 @@ public class HttpConnectResponse
 				cookie += "path=/; HttpOnly";
 				
 				connection.setRequestProperty("Cookie",cookie);
-				Log.i("set Cookie : " , cookie ) ;
+				//Log.i("set Cookie : " , cookie ) ;
 			}
 			
 			
