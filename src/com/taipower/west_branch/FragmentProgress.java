@@ -325,16 +325,10 @@ public class FragmentProgress extends Fragment
 		@Override
 		protected void onProgressUpdate(Integer... progress) 
 		{
-			String message = ""; 
+			super.onProgressUpdate(progress);
 			
 			if( progress[0] == 0 )
-		    {
-				message = "資料傳送中";
-		        
-				process_persent_pointr = CreateLoadingDialog.createLoadingDialog(app_context, message , CreateLoadingDialog.NON_DOWNLOAD_TAG , CreateLoadingDialog.NON_DOWNLOAD_TAG, CreateLoadingDialog.CANCELABLE);
-		    }
-		        	       	
-		    super.onProgressUpdate(progress);
+				process_persent_pointr = CreateLoadingDialog.createLoadingDialog(app_context, "資料傳送中" , CreateLoadingDialog.NON_DOWNLOAD_TAG , CreateLoadingDialog.NON_DOWNLOAD_TAG, CreateLoadingDialog.CANCELABLE);
 		}
 				
 		@Override

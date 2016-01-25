@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.taipower.west_branch"
-    android:versionCode="2016012013"
-    android:versionName="1.9.4">
+    android:versionCode="2016012602"
+    android:versionName="1.9.5">
 	
     <permission 
         android:name="taipower_west_branch_project.permission.MAPS_RECEIVE" 

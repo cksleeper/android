@@ -185,6 +185,7 @@ public class HttpConnectResponse
 	
 	private CookieManager cookie_manager;
 	private String cookie_string;
+	private ArrayList<String> cookie_array_list;
 	private String url_string;
 	private String method;
 	private String[] parameters;
@@ -290,7 +291,10 @@ public class HttpConnectResponse
 	public InputStream startConnectAndResponseInputStream() throws SSLHandshakeException, IOException, URISyntaxException
 	{	
 		if(!cookie_status)
+		{	
 			cookie_string = null;
+			cookie_array_list = null;	
+		}
 		
 		URL url = new URL(url_string);
 		URLConnection connection;
@@ -302,13 +306,13 @@ public class HttpConnectResponse
 			if(disable_ssl_status)
 				connection = disableCertificateALLHostName(((HttpsURLConnection) url.openConnection()));
 			else
-				connection = (HttpsURLConnection) url.openConnection();
+				connection = url.openConnection();
 			
 			((HttpsURLConnection) connection).setInstanceFollowRedirects(follow_redirect); 
 		}
 		else	
 		{	
-			connection = (HttpURLConnection) url.openConnection();
+			connection = url.openConnection();
 			((HttpURLConnection) connection).setInstanceFollowRedirects(follow_redirect); 
 		}
 		
@@ -318,21 +322,38 @@ public class HttpConnectResponse
 			for(String key : headers_set )
 			connection.setRequestProperty(key, headers_map.get(key));	
 		}
-		//((URLConnection) connection).setRequestProperty("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-		//((URLConnection) connection).setRequestProperty("Accept-Encoding","gzip, deflate, sdch");
-		//((URLConnection) connection).setRequestProperty("Accept-Language","zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,ja;q=0.2");	
-		//((URLConnection) connection).setRequestProperty("Host","ebpps.taipower.com.tw");
-		//((URLConnection) connection).setRequestProperty("Origin","http://wapp.taipower.com.tw");
-		//((URLConnection) connection).setRequestProperty("Referer","http://wapp.taipower.com.tw/naweb/apfiles/Nawp2J2.asp");
-		//((URLConnection) connection).setRequestProperty("Cache-Control","max-age=0");
-		//((URLConnection) connection).setRequestProperty("Connection","keep-alive");
+		
+		//connection.setRequestProperty("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
+		//connection.setRequestProperty("Accept-Encoding","gzip, deflate, sdch");
+		//connection.setRequestProperty("Accept-Language","zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,ja;q=0.2");	
+		//connection.setRequestProperty("Host","ebpps.taipower.com.tw");
+		//connection.setRequestProperty("Origin","http://wapp.taipower.com.tw");
+		//connection.setRequestProperty("Referer","http://wapp.taipower.com.tw/naweb/apfiles/Nawp2J2.asp");
+		//connection.setRequestProperty("Cache-Control","max-age=0");
+		//connection.setRequestProperty("Connection","keep-alive");
 		connection.setRequestProperty("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36 CKSHttpConnect");
 		
+		/*
 		if( cookie_string != null)
 		{	
 			connection.setRequestProperty("Cookie",cookie_string);
 			//Log.i("set cookie",cookie_string);
 		}
+		*/
+		
+		if( cookie_array_list != null )
+		{
+			String cookie = "";
+			
+			for(String qq : cookie_array_list)
+				cookie += qq + "; ";
+			
+			cookie += "path=/; HttpOnly";
+			
+			connection.setRequestProperty("Cookie",cookie);
+			Log.i("set Cookie : ", cookie ) ;
+		}
+		
 		
 		//JDK HttpUrlConnection override getInputStream() method，urlConnection.getInputStream() connect();
 		
@@ -342,10 +363,13 @@ public class HttpConnectResponse
 			DataOutputStream wr = null;
 					
 			//add request header		
+			/*
 			if(https_check)
 				((HttpsURLConnection) connection).setRequestMethod("POST");
 			else
 				((HttpURLConnection) connection).setRequestMethod("POST");
+			*/
+			((HttpURLConnection) connection).setRequestMethod("POST");
 			
 			connection.setReadTimeout(30000);
 			//send post request
@@ -367,16 +391,20 @@ public class HttpConnectResponse
 		}
 		else
 		{
+			/*
 			if(https_check)
 				((HttpsURLConnection) connection).setRequestMethod("GET");
 			else
 				((HttpURLConnection) connection).setRequestMethod("GET");
-		
+			*/
+			((HttpURLConnection) connection).setRequestMethod("GET");
+			
 			connection.setReadTimeout(30000);
 			//send post request
 			connection.connect();
 		}
 		
+		/*
 		if( cookie_string == null )
 		{	
 			cookie_string = connection.getHeaderField("Set-Cookie");
@@ -386,8 +414,39 @@ public class HttpConnectResponse
 			//	Log.i("get Cookies : " , cookie_string);	
 		}
 		
-		if( cookie_string != null )
-			Log.i("get Cookies : " , cookie_string);	
+		//if( cookie_string != null )
+		//	Log.i("get Cookies : " , cookie_string);	
+		*/
+		
+		if( cookie_array_list == null )
+		{
+			cookie_array_list = new ArrayList<String>();
+			if( connection.getHeaderField("Set-Cookie") != null && connection.getHeaderField("Set-Cookie").contains(";") )
+				cookie_array_list.add(connection.getHeaderField("Set-Cookie").split(";")[0]);
+			
+			Log.i("add new cookie : ", cookie_array_list.toString());
+		}	
+		
+		String cookie_temp = connection.getHeaderField("Set-Cookie");
+		
+		if( cookie_temp != null && !cookie_array_list.contains(cookie_temp.split(";")[0]))
+		{
+			//Log.i("temp cookie",cookie_temp);
+			cookie_array_list.add(cookie_temp.split(";")[0]);
+			
+			//cookie_string_list.add("__utma=4361142.1055650384.1421299797.1434792678.1434938224.71");
+			//cookie_string_list.add("style=Small Text");
+			//cookie_string_list.add("_ga=GA1.3.1055650384.1421299797");
+			
+			Log.i("add new cookie : " , cookie_array_list.toString());
+		}
+		else
+		{	
+			Log.i("add new cookie : " , "cookie are the same ,not be to add");
+		}
+		
+		
+		
 		
 		if(https_check)
 			HTTP_STATUS = ((HttpsURLConnection) connection).getResponseCode();
@@ -402,28 +461,48 @@ public class HttpConnectResponse
 			redirect_url = url_string.substring(0,url_string.indexOf("/",8) ) + redirect_url;
 			
 			url = new URL(redirect_url);
-			//Log.i("Sending 'POST' request to URL : " , redirect_url);
-			
-			if(disable_ssl_status)
-				connection = disableCertificateALLHostName(((HttpsURLConnection) url.openConnection()));
-			else
-				connection = (HttpsURLConnection) url.openConnection();
-			
+			Log.i("Sending 'POST' request to redirect_url : " , redirect_url);
 			
 			if(https_check)	
+			{	
+				if(disable_ssl_status)
+					connection = disableCertificateALLHostName(((HttpsURLConnection) url.openConnection()));
+				else
+					connection = url.openConnection();
+				
 				((HttpsURLConnection) connection).setInstanceFollowRedirects(false); 
+			}
 			else	
+			{	
+				connection = url.openConnection();
+				
 				((HttpURLConnection) connection).setInstanceFollowRedirects(false); 
+			}
 			
+			/*
 			if( cookie_string != null)
 				connection.setRequestProperty("Cookie",cookie_string);
+			*/
+			
+			if( cookie_array_list != null )
+			{
+				String cookie = "";
+				
+				for(String qq : cookie_array_list)
+					cookie += qq + "; ";
+				
+				cookie += "path=/; HttpOnly";
+				connection.setRequestProperty("Cookie",cookie);
+				Log.i("set Cookie : " , cookie ) ;
+			}
+			
 			
 			if(https_check)
 				HTTP_STATUS = ((HttpsURLConnection) connection).getResponseCode();
 			else
 				HTTP_STATUS = ((HttpURLConnection) connection).getResponseCode();
 			
-			Log.i("Response Code : " ,String.valueOf( HTTP_STATUS) );
+			Log.i("redirect Response Code : ",String.valueOf(HTTP_STATUS) );
 		}	
 		
 		if( HTTP_STATUS == HttpURLConnection.HTTP_OK )
@@ -443,11 +522,13 @@ public class HttpConnectResponse
 	
 	public static byte[] onOpenConnection( String url_string, String method, String[] parameters, boolean cookie_state, boolean http_redirect) throws IOException, URISyntaxException,SSLHandshakeException
 	{
+		/*
 		if( cookieManager == null )
 		{	
 			cookieManager = new CookieManager();
 			CookieHandler.setDefault(cookieManager);
 		}
+		*/
 		
 		URLConnection connection = null;
 		boolean https_check = url_string.startsWith("https");
@@ -687,7 +768,6 @@ public class HttpConnectResponse
 		}
 		*/
 		
-		
 		if( cookie_string_list == null )
 		{
 			cookie_string_list = new ArrayList<String>();
@@ -743,6 +823,7 @@ public class HttpConnectResponse
 				((HttpURLConnection) connection).setInstanceFollowRedirects(false); 
 				//HttpURLConnection.setFollowRedirects(false);
 			}
+			
 			/*
 			if( cookies != null)
 			{
@@ -763,7 +844,6 @@ public class HttpConnectResponse
 				connection.setRequestProperty("Cookie",cookie);
 				//Log.i("set Cookie : " , cookie ) ;
 			}
-			
 			
 			if(https_check)
 				CONNECTION_STATE_CODE = ((HttpsURLConnection) connection).getResponseCode();
