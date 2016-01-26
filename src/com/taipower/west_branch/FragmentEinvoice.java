@@ -529,31 +529,29 @@ public class FragmentEinvoice extends Fragment
     				{	
     					//Server is had update connection limit at 1 second
     					//wait 5 seconds to connect
-    					/*
+    					
     					connection.setUrl(params[1]);
     					connection.setConnectMethod("GET", null);
-    					connection.setCookieStatus(HttpConnectResponse.COOKIE_CLEAR);
+    					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
     					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
     					response_data_content = connection.startConnectAndResponseByteArray();
-    					//cookie = connection.getCookie();
-    					*/
     					
+    					/*
     					if( tag_value.contains("refresh"))
     						response_data_content = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
     					else
     						response_data_content = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_CLEAR,HttpConnectResponse.HTTP_NONREDIRECT ) ;
-    					
+    					*/
     					
     					Thread.sleep(1000l);
-    					/*
+    					
     					connection.setUrl(params[2]);
     					connection.setConnectMethod("GET", null);
     					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
     					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
     					response_data = connection.startConnectAndResponseByteArray();
-    					*/
     					
-    					response_data = HttpConnectResponse.onOpenConnection(params[2], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+    					//response_data = HttpConnectResponse.onOpenConnection(params[2], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
     					
     					//session code
     					//response_code = HttpConnectResponse.onOpenConnection(params[3], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
@@ -563,14 +561,14 @@ public class FragmentEinvoice extends Fragment
 				
     				if( tag_value.equals("send") )
     				{		
-    					/*
+    					
     					connection.setUrl(params[1]);
     					connection.setConnectMethod("POST", new String[]{params[2]});
     					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
     					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
     					response_data_content = connection.startConnectAndResponseByteArray();
-    					*/
-    					response_data_content = HttpConnectResponse.onOpenConnection( params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+    					
+    					//response_data_content = HttpConnectResponse.onOpenConnection( params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
     					
 					
     					return_value = 2;
