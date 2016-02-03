@@ -1,6 +1,5 @@
 package com.taipower.west_branch;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -92,15 +91,14 @@ public class FragmentTaipowerTV extends Fragment
 	
 	private int view_width;
 
-	private ImageView left_arrow; 
-	private ImageView right_arrow; 
-	
-	private Animation slight ;
+	//private ImageView left_arrow; 
+	//private ImageView right_arrow; 
+	//private Animation slight ;
 	
 	private ArrayList<View> view_list;
 	
-    private static final int NUMBER_OF_VIDEOS_RETURNED = 21;
-
+    private static final int NUMBER_OF_VIDEOS_RETURNED = 10;
+    private LinearLayout indicator_layout;
     /**
      * Define a global instance of a Youtube object, which will be used
      * to make YouTube Data API requests.
@@ -139,7 +137,7 @@ public class FragmentTaipowerTV extends Fragment
         //LinearLayout scroll_content = (LinearLayout) view.findViewById(R.id.scroll_content);
         //scroll_content.setGravity(Gravity.CENTER_VERTICAL);
         
-        
+        /*
         slight = new AlphaAnimation(1.0f , 0.0f );
         slight.setRepeatCount(Animation.INFINITE);
         slight.setRepeatMode(Animation.REVERSE);
@@ -155,8 +153,7 @@ public class FragmentTaipowerTV extends Fragment
         //right_arrow.setAnimation(slight);
         right_arrow.setVisibility(View.INVISIBLE);
         right_arrow.setVisibility(View.VISIBLE);
-        
-        view_list = new ArrayList<View>();
+        */
         
         new DoingBackgroundAsyncTask().execute(null,null);
         
@@ -190,13 +187,11 @@ public class FragmentTaipowerTV extends Fragment
 	
 	private class MyPagerAdapter extends PagerAdapter
 	{
-		
 		ArrayList<View> adapter_list_view; 
 		
-		public MyPagerAdapter(ArrayList<View> list_view )
+		public MyPagerAdapter(ArrayList<View> list_view)
 		{
-			adapter_list_view = list_view;
-			
+			adapter_list_view = list_view;	
 		}
 		
 		@Override
@@ -205,53 +200,82 @@ public class FragmentTaipowerTV extends Fragment
 	        return "title";
 	    }
 	     
-		
 		@Override
-		public int getCount() 
-		{
+		public int getCount() {
 			// TODO Auto-generated method stub
+			//return adapter_list_view.size();
 			return adapter_list_view.size();
 		}
-
+		
 		@Override
 		public boolean isViewFromObject(View arg0, Object arg1) 
 		{
 			// TODO Auto-generated method stub
-			return arg0 == (arg1);
+			return arg0 == (arg1);	
 		}
-		
-		
 		
 		@Override  
         public void destroyItem(ViewGroup container, int position, Object object) 
 		{  
-			View view = (View) object;
-			//((ViewPager)container).removeView(adapter_list_view.get(position));
-			//Log.i("remove object in container", "" + position );
-			//Log.i("object  adapter_list_view", object.toString() + "  " + adapter_list_view.get(position).toString());
-			((ViewPager)container).removeView(view);
-			view = null;
+			//Log.i("position", "" + position);
+			if( position == (adapter_list_view.size() -1 ))
+			{
+				//Log.i("destroyItem postion","" + (adapter_list_view.size() -1) + " " + adapter_list_view.get(adapter_list_view.size() -1).toString());
+				//((ViewPager)container).removeView(adapter_list_view.get((adapter_list_view.size() -1 )));
+			}
+			
+			{	
+				//Log.i("destroyItem postion", position + " " + adapter_list_view.get(position).toString());
+				((ViewPager)container).removeView(adapter_list_view.get(position));
+			}
         }  
 		
-		//initialization position
+		//初始化position位置的界面
 		@Override
 		public Object instantiateItem(View container, int position) 
 		{  
-			((ViewPager)container).addView(adapter_list_view.get( position));
-			//Log.i("instantiate item", "" + position);
-            return   adapter_list_view.get( position);
+			//Log.i("position", "" + position);
+			
+			if( position == 0)
+			{
+				//Log.i("instantiateItem postion",( adapter_list_view.size() - 1) + " " + adapter_list_view.get( adapter_list_view.size() - 1).toString());
+				((ViewPager)container).removeView(adapter_list_view.get(adapter_list_view.size() - 1));
+				((ViewPager)container).addView(adapter_list_view.get( adapter_list_view.size() - 1));	
+			}
+			else if( position == (adapter_list_view.size() -1 ))
+			{
+				//Log.i("instantiateItem postion","1 " +  adapter_list_view.get(1).toString());
+				((ViewPager)container).removeView(adapter_list_view.get(1));
+				((ViewPager)container).addView(adapter_list_view.get(1));
+			}
+			
+			{	
+				//Log.i("instantiateItem postion",position + " " + adapter_list_view.get( position).toString());
+				((ViewPager)container).removeView(adapter_list_view.get(position));
+				((ViewPager)container).addView(adapter_list_view.get( position));
+			}
+			
+			return   adapter_list_view.get( position);
         }
 	}
-	
-	
 	
 	private OnPageChangeListener page_change_listener = new OnPageChangeListener()
 	{
 		@Override
-		public void onPageScrollStateChanged(int postion) 
+		public void onPageScrollStateChanged(int status) 
 		{
 			// TODO Auto-generated method stub
-			
+			if( status == ViewPager.SCROLL_STATE_IDLE )
+			{
+				//Log.i("current page","" + view_pager.getCurrentItem());
+				
+				if( view_pager.getCurrentItem() == 0)
+					view_pager.setCurrentItem( view_list.size() - 2, false);
+				if( view_pager.getCurrentItem() == view_list.size() - 1)
+					view_pager.setCurrentItem(1, false);
+				
+				//Log.i("current page","" + view_pager.getCurrentItem());
+			}
 		}
 
 		@Override
@@ -262,9 +286,10 @@ public class FragmentTaipowerTV extends Fragment
 		}
 
 		@Override
-		public void onPageSelected(int postion) 
+		public void onPageSelected(int position) 
 		{
 			// TODO Auto-generated method stub
+			/*
 			switch(postion)
 			{
 				case NUMBER_OF_VIDEOS_RETURNED - 1 :
@@ -282,11 +307,23 @@ public class FragmentTaipowerTV extends Fragment
 					left_arrow.setVisibility(View.VISIBLE);
 					break;
 			}
+			*/
+			
+			for(int i = 0 ; i <indicator_layout.getChildCount(); i++)
+				indicator_layout.getChildAt(i).setBackgroundResource(R.drawable.dot48_0);
+			
+			//Log.i("position","" + position);
+			
+			if( position == 0)
+				indicator_layout.getChildAt(indicator_layout.getChildCount() -1).setBackgroundResource(R.drawable.dot48_1);
+			else if( position == view_list.size() - 1)
+				indicator_layout.getChildAt(0).setBackgroundResource(R.drawable.dot48_1);
+			else
+				indicator_layout.getChildAt(position -1).setBackgroundResource(R.drawable.dot48_1);
 		}
 	}; 
 	
-	
-	
+	private ViewPager view_pager;
 	
 	private class DoingBackgroundAsyncTask extends AsyncTask<String ,Integer ,Integer >
 	{
@@ -296,7 +333,6 @@ public class FragmentTaipowerTV extends Fragment
 			publishProgress(0);
 			
 			super.onPreExecute();
-			
 		}
 		
 		byte[] response_data;
@@ -422,15 +458,11 @@ public class FragmentTaipowerTV extends Fragment
 	                    
 	                    temp_linear_layout.addView(description);
 	                    view_list.add(temp_linear_layout);
-	                	
-	                	
 	                }
-	                
 	            }
 	        	*/
 	        	
 	        	response_data = HttpConnectResponse.onOpenConnection("http://tv.taipower.com.tw/", "GET", null, false, false);
-	        	
 	        	
 	        	Document document = Jsoup.parse(new String(response_data,"utf-8"));
 	        	Elements javascript_elements = document.select("script[language=javascript]");
@@ -460,25 +492,25 @@ public class FragmentTaipowerTV extends Fragment
         		//Log.i("Base Memory :" , "" + base_memory);  
         		//Log.i("Large Memory :" , "" + large_memory);
 	        	
+        		String[] youtube_res = new String[]{"/mqdefault.jpg","/hqdefault.jpg","/sddefault.jpg","/maxresdefault.jpg"}; 
+        		int youtube_res_index = 0;
+        		
+        		if( base_memory < 90 )
+        			youtube_res_index = activityManager.getMemoryClass() / 30;
+        		else
+        			youtube_res_index = 3;
         		
         		
-	        	for( int i = 0 ; i < NUMBER_OF_VIDEOS_RETURNED ;i++)
+        		view_list = new ArrayList<View>();
+        		for(int i = 0; i < NUMBER_OF_VIDEOS_RETURNED + 2; i++)
+        			view_list.add(new View(app_context)); 
+        		
+	        	for( int i = 0 ; i < NUMBER_OF_VIDEOS_RETURNED ; i++)
 	        	{
-	        		ImageButton temp_button = new ImageButton(app_context);
-	        		temp_button.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT ,(int) (view_width/16)*9 ));
+	        		ImageButton button = new ImageButton(app_context);
+	        		button.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT ,(int) (view_width/16)*9 ));
 	        		
-	        		
-	        		String[] youtube_res = new String[]{"/mqdefault.jpg","/hqdefault.jpg","/sddefault.jpg","/maxresdefault.jpg"}; 
-                
-	        		int youtube_res_index = 0;
-                
-	        		if( base_memory < 90 )
-	        			youtube_res_index = activityManager.getMemoryClass() / 30;
-	        		else
-	        			youtube_res_index = 3;
-                
 	        		//Log.i("youtube_res_index Memory " , "" + youtube_res_index );
-                
 	        		
 	        		URL newurl = new URL("https://i.ytimg.com/vi/"+ youtube_id_array[i] + youtube_res[youtube_res_index]  ); 
 	        		//Bitmap bitmap = BitmapFactory.decodeStream(newurl.openConnection().getInputStream());
@@ -486,25 +518,51 @@ public class FragmentTaipowerTV extends Fragment
 	        		Drawable drawable = BitmapDrawable.createFromStream(newurl.openConnection().getInputStream(), youtube_id_array[i]);
 	        		
 	        		if( VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN )
-	        			temp_button.setBackground(drawable);
+	        			button.setBackground(drawable);
 	        		else
-	        			temp_button.setBackgroundDrawable(drawable);
-	        		
-	        		final String youtube_id = youtube_id_array[i];
+	        			button.setBackgroundDrawable(drawable);
 	        		
 	        		//button0.startAnimation(button_animation);
-	        		temp_button.setOnClickListener(new OnClickListener()
+	        		button.setTag(youtube_id_array[i]);
+	        		button.setOnClickListener(on_click_listener);
+	        		
+	        		if( i == 0 )
 	        		{
-	        			@Override
-	        			public void onClick(View v) 
-	        			{
-	        				// TODO Auto-generated method stub
-	        				Uri uri = Uri.parse("http://www.youtube.com/embed/" + youtube_id  + "?rel=0" );
-	        				Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-	        				app_activity.startActivity(intent);
-	        			}	
-                });
-            	
+	        			ImageButton image_button = new ImageButton(app_context);
+	        			image_button.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT ,(int) (view_width/16)*9 ));
+	        			if( VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN )
+	        				image_button.setBackground(drawable);
+		        		else
+		        			image_button.setBackgroundDrawable(drawable);
+	        			image_button.setTag(youtube_id_array[i]);
+	        			image_button.setOnClickListener(on_click_listener);
+	        			
+	        			LinearLayout temp_linear_layout = new LinearLayout(app_context);
+	                    temp_linear_layout.setOrientation(LinearLayout.VERTICAL);
+	                    temp_linear_layout.setGravity(Gravity.CENTER_VERTICAL);
+	                    temp_linear_layout.addView(image_button);
+	        			
+		        		view_list.set(NUMBER_OF_VIDEOS_RETURNED+1,temp_linear_layout);
+	        		}
+	        		
+	        		if( i == NUMBER_OF_VIDEOS_RETURNED - 1 )
+	        		{
+	        			ImageButton image_button = new ImageButton(app_context);
+	        			image_button.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT ,(int) (view_width/16)*9 ));
+	        			if( VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN )
+	        				image_button.setBackground(drawable);
+		        		else
+		        			image_button.setBackgroundDrawable(drawable);
+	        			image_button.setTag(youtube_id_array[i]);
+	        			image_button.setOnClickListener(on_click_listener);
+	        			
+	        			LinearLayout temp_linear_layout = new LinearLayout(app_context);
+	                    temp_linear_layout.setOrientation(LinearLayout.VERTICAL);
+	                    temp_linear_layout.setGravity(Gravity.CENTER_VERTICAL);
+	                    temp_linear_layout.addView(image_button);
+	        			
+		        		view_list.set(0,temp_linear_layout);
+	        		}
                 
                 LinearLayout temp_linear_layout = new LinearLayout(app_context);
                 temp_linear_layout.setOrientation(LinearLayout.VERTICAL);
@@ -512,11 +570,11 @@ public class FragmentTaipowerTV extends Fragment
             
                 //temp_linear_layout.addView(title_view);
                 
-                temp_linear_layout.addView(temp_button);
+                temp_linear_layout.addView(button);
                 
                 
                 //temp_linear_layout.addView(description);
-                view_list.add(temp_linear_layout);
+                view_list.set(i+1,temp_linear_layout);
                 
                 
                 
@@ -577,8 +635,7 @@ public class FragmentTaipowerTV extends Fragment
 			
 			if( result != null)
         	{
-        	
-        	
+				
         	if( result == 0 )
             	Toast.makeText(app_context, "連結錯誤" , Toast.LENGTH_LONG).show();
         	if( result == 1 )
@@ -593,17 +650,26 @@ public class FragmentTaipowerTV extends Fragment
         	else 
         	{
 			
-			
-			
-			
-			
+        		DmInfor dm = new DmInfor(app_activity,app_context);
+        		
+        		indicator_layout = (LinearLayout) findViewById(R.id.indicator_layout);
+        		
+                for(int i = 0 ; i <  view_list.size() - 2; i++ )
+        		{
+                	View indictor = new View(app_context);
+                	indictor.setLayoutParams(new LinearLayout.LayoutParams( (int)(10.0f * dm.scale) , LayoutParams.WRAP_CONTENT));
+                	indictor.setClickable(false);
+                	indictor.setTag(new Integer(i));
+                	indictor.setBackgroundResource(R.drawable.dot48_0);
+                	indicator_layout.addView(indictor,i);
+        		}
+        		
 			MyPagerAdapter pager_adapter = new MyPagerAdapter(view_list);
 	        
-	        ViewPager view_pager = (ViewPager) current_view.findViewById(R.id.view_pager);
+	        view_pager = (ViewPager) current_view.findViewById(R.id.view_pager);
 	        view_pager.setAdapter(pager_adapter);
-	        //view_pager.setCurrentItem(1)
 	        view_pager.setOnPageChangeListener(page_change_listener);
-	        
+	        view_pager.setCurrentItem(1);
 	        
 	        //auto scroll use other class method
 	        //FragmentRssReader other_class = new FragmentRssReader(); 
@@ -614,7 +680,16 @@ public class FragmentTaipowerTV extends Fragment
 	}
 	
 	
-	
+	private OnClickListener on_click_listener = new OnClickListener()
+	{
+		@Override
+		public void onClick(View v)
+		{
+			Uri uri = Uri.parse("http://www.youtube.com/embed/" + v.getTag().toString() + "?rel=0" );
+			Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+			app_activity.startActivity(intent);
+		}
+	};
 		
 	
 }

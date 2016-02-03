@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import org.jsoup.Jsoup;
@@ -268,6 +269,8 @@ public class FragmentProgress extends Fragment
 		@Override
 		protected Integer doInBackground(String... params) 
 		{
+			Integer return_value = null;
+			
 			// TODO Auto-generated method stub
     		if ( ASaBuLuCheck.isOnline(app_activity))			
     		{
@@ -300,23 +303,25 @@ public class FragmentProgress extends Fragment
     				}
     				
 					if( response_data == null)
-						return 9;
+						return_value = 9;
 				} 
 				catch (IOException e) 
 				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					return_value = 9;
 				}	 
 				catch (URISyntaxException e) 
 				{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					return_value = 9;
 				}
     		}
     		else
-    			return 4;
+    			return_value = 4;
     		
-			return null;
+			return return_value;
 		}
 		
 		//Dialog process_persent = null;

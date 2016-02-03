@@ -374,20 +374,20 @@ public class FragmentEinvoice extends Fragment
 		//if (scanning_result != null)
 		if( barcode_result != null )
 	    {
-			String error_message = "";
+			StringBuilder error_message = new StringBuilder("");
 			
 			if(!barcode_format.startsWith("CODE_128"))
-				error_message += "條碼格式錯誤\n";
+				error_message.append("條碼格式錯誤\n");
 			
 			if( barcode_result.length() != 30 || !barcode_result.substring(5, 7).equals("BB"))
-				error_message += "非台電公司電子發票條碼\n";
+				error_message.append("非台電公司電子發票條碼\n");
 			else
 			{
 				String[] side_array = new String[]{"N","C","S","X","Y","Z","E"};
 				String side = barcode_result.substring(7,8);
 				
 				if( !ASaBuLuCheck.electricCheckFunction(barcode_result.substring(19))  )
-					error_message += "檢核碼錯誤\n";
+					error_message.append("檢核碼錯誤\n");
 					
 				boolean check = false;
 				
@@ -401,10 +401,10 @@ public class FragmentEinvoice extends Fragment
 				}
 				
 				if(!check)
-					error_message += "非台電公司電子發票條碼";
+					error_message.append("非台電公司電子發票條碼");
 			}
 			
-			if( error_message.equals("")  )
+			if( error_message.toString().equals("")  )
 			{
 				/*
 				Log.i("barcode_result",barcode_result.substring(0, 5));
@@ -431,13 +431,12 @@ public class FragmentEinvoice extends Fragment
 				VNum_1.setText(barcode_result.substring(0, 5).toString());
 				VNum_2.setText(barcode_result.substring(5, 15).toString());
 				VNum_3.setText(barcode_result.substring(15, barcode_result.length()).toString());
-				
 			}
 			else
 			{
 				AlertDialog.Builder alert_dialog = new AlertDialog.Builder(app_context);
 				alert_dialog.setTitle("掃描發生錯誤");
-				alert_dialog.setMessage(error_message);
+				alert_dialog.setMessage(error_message.toString());
 				alert_dialog.setNeutralButton("確定", null);
 				alert_dialog.show();
 			}
@@ -561,7 +560,6 @@ public class FragmentEinvoice extends Fragment
 				
     				if( tag_value.equals("send") )
     				{		
-    					
     					connection.setUrl(params[1]);
     					connection.setConnectMethod("POST", new String[]{params[2]});
     					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
@@ -570,7 +568,6 @@ public class FragmentEinvoice extends Fragment
     					
     					//response_data_content = HttpConnectResponse.onOpenConnection( params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
     					
-					
     					return_value = 2;
     				}
     				/*
@@ -584,21 +581,25 @@ public class FragmentEinvoice extends Fragment
     			{
     				// TODO Auto-generated catch block
     				e.printStackTrace();
+    				return_value = 9;
     			}
     			catch (IOException e) 
     			{
     				// TODO Auto-generated catch block
     				e.printStackTrace();
+    				return_value = 9;
     			} 
     			catch (NumberFormatException e) 
     			{
     				// TODO Auto-generated catch block
     				e.printStackTrace();
+    				return_value = 9;
     			} 
     			catch (URISyntaxException e) 
     			{
     				// TODO Auto-generated catch block
     				e.printStackTrace();
+    				return_value = 9;
     			} 
     		}
     		else
@@ -811,7 +812,7 @@ public class FragmentEinvoice extends Fragment
 					show_dialog.show();	
 				}
 				
-				if( result.intValue() == 4 )
+				if( result.intValue() == 4 || result.intValue() == 9)
 				{	
 					String error_message = "網路錯誤！！請檢查網際網路是否開啟\n或請稍候再試";
 					

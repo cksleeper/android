@@ -288,106 +288,111 @@ public class FragmentPayState extends Fragment
     		if( ASaBuLuCheck.isOnline(app_activity) )
     		{
 			
-			tag_value = params[0];			
+    			tag_value = params[0];			
 			
-			try 
-			{
-				if(connection == null )
-					connection = new HttpConnectResponse();
+    			try 
+    			{
+    				if(connection == null )
+    					connection = new HttpConnectResponse();
 				
-				if( tag_value.equals("check_code"))
-				{	
-					//Server is had update connection limit at 1 second
-					//wait 5 seconds to connect
+    				if( tag_value.equals("check_code"))
+    				{	
+    					//Server is had update connection limit at 1 second
+    					//wait 5 seconds to connect
+    					
+    					connection.setUrl(params[1]);
+    					connection.setConnectMethod("GET", null);
+    					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+    					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+    					response_data_content = connection.startConnectAndResponseByteArray();
+    					    					
+    					//response_data_content = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_CLEAR,HttpConnectResponse.HTTP_NONREDIRECT ) ;
 					
-					connection.setUrl(params[1]);
-					connection.setConnectMethod("GET", null);
-					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
-					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
-					response_data_content = connection.startConnectAndResponseByteArray();
-					//cookie = connection.getCookie();
+    					Thread.sleep(1500l);
 					
-					//response_data_content = HttpConnectResponse.onOpenConnection(params[1], "GET", null, HttpConnectResponse.COOKIE_CLEAR,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+    					connection.setUrl(params[2]);
+    					connection.setConnectMethod("GET", null);
+    					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+    					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+    					response_data = connection.startConnectAndResponseByteArray();
 					
-					Thread.sleep(1500l);
-					
-					connection.setUrl(params[2]);
-					connection.setConnectMethod("GET", null);
-					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
-					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
-					response_data = connection.startConnectAndResponseByteArray();
-					
-					//response_data = HttpConnectResponse.onOpenConnection(params[2], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
-					
-					return_value = 1;
-				}
+    					//response_data = HttpConnectResponse.onOpenConnection(params[2], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+    					
+    					if( response_data_content == null || response_data == null )
+    						return_value = 9;
+    					else
+    						return_value = 1;
+    				}
 				
-				if( tag_value.equals("send") )
-				{	
-					connection.setUrl(params[1]);
-					connection.setConnectMethod("POST", new String[]{params[2]});
-					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
-					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
-					response_data = connection.startConnectAndResponseByteArray();
+    				if( tag_value.equals("send") )
+    				{	
+    					connection.setUrl(params[1]);
+    					connection.setConnectMethod("POST", new String[]{params[2]});
+    					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+    					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+    					response_data = connection.startConnectAndResponseByteArray();
 					
-					//response_data = HttpConnectResponse.onOpenConnection( params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+    					//response_data = HttpConnectResponse.onOpenConnection( params[1], "POST", new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
 					
-					return_value = 2;
-				}
+    					return_value = 2;
+    				}	
 				
-				if( tag_value.equals("show_money0") )
-				{	
-					connection.setUrl(params[1]);
-					connection.setConnectMethod("GET", null);
-					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
-					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
-					response_data_content = connection.startConnectAndResponseByteArray();
+    				if( tag_value.equals("show_money0") )
+    				{	
+    					connection.setUrl(params[1]);
+    					connection.setConnectMethod("GET", null);
+    					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+    					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+    					response_data_content = connection.startConnectAndResponseByteArray();
 					
-					//response_data_content = HttpConnectResponse.onOpenConnection( params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+    					//response_data_content = HttpConnectResponse.onOpenConnection( params[1], "GET", null, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
 					
-					return_value = 5;
-				}
+    					return_value = 5;
+    				}
 				
-				if( tag_value.equals("show_money1") )
-				{	
-					connection.setUrl(params[1]);
-					connection.setConnectMethod("POST", new String[]{params[2]});
-					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
-					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
-					response_data = connection.startConnectAndResponseByteArray();
+    				if( tag_value.equals("show_money1") )
+    				{	
+    					connection.setUrl(params[1]);
+    					connection.setConnectMethod("POST", new String[]{params[2]});
+    					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
+    					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
+    					response_data = connection.startConnectAndResponseByteArray();
 					
-					//response_data = HttpConnectResponse.onOpenConnection( params[1], "POST",new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
+    					//response_data = HttpConnectResponse.onOpenConnection( params[1], "POST",new String[]{params[2]}, HttpConnectResponse.COOKIE_KEEP,HttpConnectResponse.HTTP_NONREDIRECT ) ;
 					
-					return_value = 6;
-				}
+    					return_value = 6;
+    				}	
 				
-				if( connection.HTTP_STATUS >= HttpConnectResponse.HTTP_FORBIDDEN && connection.HTTP_STATUS <= HttpConnectResponse.HTTP_NOT_FOUND )
-					return_value = 404;
-				//if( HttpConnectResponse.CONNECTION_STATE_CODE >= 400 && HttpConnectResponse.CONNECTION_STATE_CODE <= 404 )
-				//	return_value = 404;
-				
-			} 
-			catch (InterruptedException e) 
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			catch (IOException e) 
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			catch (NumberFormatException e) 
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			catch (URISyntaxException e) 
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			
+    				if( connection.HTTP_STATUS >= HttpConnectResponse.HTTP_FORBIDDEN && connection.HTTP_STATUS <= HttpConnectResponse.HTTP_NOT_FOUND )
+    					return_value = 404;
+    				//if( HttpConnectResponse.CONNECTION_STATE_CODE >= 400 && HttpConnectResponse.CONNECTION_STATE_CODE <= 404 )
+    				//	return_value = 404;
+    				
+    			} 
+    			catch (InterruptedException e) 
+    			{
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    				return_value = 9;
+    			}
+    			catch (IOException e) 
+    			{
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    				return_value = 9;
+    			} 
+    			catch (NumberFormatException e) 
+    			{
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    				return_value = 9;
+    			} 
+    			catch (URISyntaxException e) 
+    			{
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    				return_value = 9;
+    			} 
 			
     		}
     		else
@@ -682,7 +687,7 @@ public class FragmentPayState extends Fragment
 				}
 			    
 			}
-			else if( result.intValue() == 404 )
+			else if( result.intValue() == 404 || result.intValue() == 9)
 			{
 				AlertDialog.Builder connection_error = new AlertDialog.Builder(app_context);
 				connection_error.setTitle("網路資料錯誤");

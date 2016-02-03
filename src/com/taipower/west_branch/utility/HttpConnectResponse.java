@@ -1,78 +1,37 @@
 package com.taipower.west_branch.utility;
 
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.HttpCookie;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 
-
-
-
-
-
-/*
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
-*/
-import com.google.api.client.util.IOUtils;
-
-
-
 import android.annotation.SuppressLint;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 
-@SuppressWarnings("deprecation")
+
 public class HttpConnectResponse 
 {
 	/*  URLconnect Not run @ Taipowr ebpps why ??
@@ -175,26 +134,21 @@ public class HttpConnectResponse
 	public final static boolean COOKIE_KEEP = true;
 	public final static boolean COOKIE_CLEAR = false;
 	
-	private static ArrayList<String> cookie_string_list;
 	/*
 	 *  Create URLConnection class connection to replace apache http class( was be deprecated after API 22)
 	 * 
 	 */
+	private static String user_agent_string = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36 CKSHttpConnect"; 
 	
 	private CKSCookieManager cks_cookie_manager;
-	private String cookie_string;
-	private ArrayList<String> cookie_array_list;
 	private String url_string;
 	private String method;
 	private String[] parameters;
-	private boolean disable_ssl_status = true;;
+	private boolean disable_ssl_status = true;
 	private boolean cookie_status;
 	private boolean follow_redirect;
 	private HashMap<String,String> headers_map;
 	
-	public static final int HTTP_OK = HttpURLConnection.HTTP_OK;
-	public static final int HTTP_FORBIDDEN = HttpURLConnection.HTTP_FORBIDDEN;
-	public static final int HTTP_NOT_FOUND = HttpURLConnection.HTTP_NOT_FOUND;
 	public int HTTP_STATUS;
 	
 	public HttpConnectResponse()
@@ -264,12 +218,10 @@ public class HttpConnectResponse
 		cks_cookie_manager.setCookieConetnt(cookie);
 	}
 	
-	public InputStream startConnectAndResponseInputStream() throws SSLHandshakeException, IOException, URISyntaxException
+	public InputStream startConnectAndResponseInputStream() throws SSLHandshakeException, IOException, URISyntaxException, UnknownHostException
 	{	
 		if(!cookie_status)
-		{	
 			cks_cookie_manager.clearCookieData();
-		}
 		
 		URL url = new URL(url_string);
 		URLConnection connection;
@@ -303,7 +255,7 @@ public class HttpConnectResponse
 		//connection.setRequestProperty("Referer","http://wapp.taipower.com.tw/naweb/apfiles/Nawp2J2.asp");
 		//connection.setRequestProperty("Cache-Control","max-age=0");
 		//connection.setRequestProperty("Connection","keep-alive");
-		connection.setRequestProperty("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36 CKSHttpConnect");
+		connection.setRequestProperty("User-Agent",user_agent_string);
 		
 		connection = cks_cookie_manager.setConnectionCookieData(connection);
 		
@@ -368,12 +320,11 @@ public class HttpConnectResponse
 					connection = url.openConnection();
 			}
 			else	
-			{	
 				connection = url.openConnection();
-			}
 			
 			((HttpURLConnection) connection).setInstanceFollowRedirects(false); 
-			connection.setRequestProperty("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36 CKSHttpConnect");
+			
+			connection.setRequestProperty("User-Agent",user_agent_string);
 			
 			connection = cks_cookie_manager.setConnectionCookieData(connection);
 			
@@ -394,32 +345,43 @@ public class HttpConnectResponse
 	}
 	
 	
-	private class CKSCookieManager extends Object
+	private static class CKSCookieManager extends Object
 	{
 		ArrayList<String> save_cookie_array_list; 
+		String host_string; 
 		
 		public CKSCookieManager()
 		{
-			save_cookie_array_list = new ArrayList<String>(); 
+			save_cookie_array_list = new ArrayList<String>();
+			host_string = new String();
 		}
-		
 		
 		public URLConnection setConnectionCookieData(URLConnection connection)
 		{
-			String cookie = "";
+			if( save_cookie_array_list.size() > 0)
+			{
+				connection.setRequestProperty("Host", host_string);
+			
+				StringBuilder cookie = new StringBuilder("");
 				
-			for(String qq : save_cookie_array_list)
-				cookie += qq + "; ";
+				for(String qq : save_cookie_array_list)
+				{	
+					cookie.append(qq); 
+					cookie.append("; ");
+				}
+				cookie.append("path=/; HttpOnly");
+				
+				connection.setRequestProperty("Cookie",cookie.toString());
+				//Log.i("set Cookie : ", cookie.toString() ) ;
+			}
 			
-			cookie += "path=/; HttpOnly";
-			
-			connection.setRequestProperty("Cookie",cookie);
-			//Log.i("set Cookie : ", cookie ) ;
 			return connection;
 		}
 		
 		public void getConnectionCookieData(URLConnection connection) 
 		{
+			host_string =  connection.getURL().getHost();
+			
 			String cookie_string = connection.getHeaderField("Set-Cookie");
 			
 			if( cookie_string != null && cookie_string.contains(";") && !save_cookie_array_list.contains(cookie_string.split(";")[0]) )
@@ -452,60 +414,38 @@ public class HttpConnectResponse
 		}
 	}
 	
+	public static final int HTTP_OK = HttpURLConnection.HTTP_OK;
+	public static final int HTTP_FORBIDDEN = HttpURLConnection.HTTP_FORBIDDEN;
+	public static final int HTTP_NOT_FOUND = HttpURLConnection.HTTP_NOT_FOUND;
+	private static CKSCookieManager static_cks_cookie_manager;
 	
-	public static byte[] onOpenConnection( String url_string, String method, String[] parameters, boolean cookie_state, boolean http_redirect) throws IOException, URISyntaxException,SSLHandshakeException
+	public static byte[] onOpenConnection( String url_string, String method, String[] parameters, boolean cookie_state, boolean http_redirect) throws UnknownHostException, IOException, URISyntaxException,SSLHandshakeException
 	{	
+		URL url = new URL(url_string);
 		URLConnection connection = null;
 		boolean https_check = url_string.startsWith("https");
 		byte[] http_response = null;
 		
+		if( static_cks_cookie_manager == null)
+		{
+			static_cks_cookie_manager = new CKSCookieManager();
+			Log.i("static_cks_cookie_manager","set");
+		}
 		
 		if(cookie_state == COOKIE_CLEAR )
 		{	
-			cookie_string_list = null;	
+			static_cks_cookie_manager.clearCookieData();
 			//Log.i("cookie","clear cookie");
 		}
 		
-		URL url = null;
-		
-		method =  method.toUpperCase(Locale.US);
-		
-		if( !method.startsWith("POST") )
-		{	
-			if(parameters != null )
-			{
-				if(!parameters.equals("") && !url_string.contains("?"))
-					url_string += "?" + parameters;
-			}
-			//Log.i("Sending 'GET' request to URL : " , url_string);
-		}
-		
-		url = new URL(url_string);
-		
 		if(https_check)
-		{	
-			connection = (HttpsURLConnection) url.openConnection(); 
-			
-			connection = disableCertificateALLHostName(((HttpsURLConnection) connection));
-			
-			if(http_redirect)
-				((HttpsURLConnection) connection).setInstanceFollowRedirects(true); 
-			else
-				((HttpsURLConnection) connection).setInstanceFollowRedirects(false);
-			//HttpsURLConnection.setFollowRedirects(true);
-		}
+			connection = disableCertificateALLHostName(((HttpsURLConnection) url.openConnection()));
 		else	
-		{	
-			connection = (HttpURLConnection) url.openConnection(); 
-			
-			if(http_redirect)
-				((HttpURLConnection) connection).setInstanceFollowRedirects(true); 
-			else
-				((HttpURLConnection) connection).setInstanceFollowRedirects(false);
-			
-			//HttpURLConnection.setFollowRedirects(true);
-		}
-			
+			connection = url.openConnection(); 
+		
+		((HttpURLConnection) connection).setInstanceFollowRedirects(http_redirect); 
+		//HttpsURLConnection.setFollowRedirects(false);
+		
 		//Accept:text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
 		//Accept-Encoding:gzip, deflate
 		//Accept-Language:zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4,ja;q=0.2
@@ -519,31 +459,20 @@ public class HttpConnectResponse
 		//Referer:https://einvoice.taipower.com.tw/einvoice/search_1
 		//Upgrade-Insecure-Requests:1
 		//User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36
-		 
-		connection.setRequestProperty("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36 CKSHttpConnect");
-		//connection.setRequestProperty("Origin","https://einvoice.taipower.com.tw");
-		//connection.setRequestProperty("Referer","https://einvoice.taipower.com.tw/einvoice/search_1");
-		//connection.setRequestProperty("Host","einvoice.taipower.com.tw");
-		//connection.setRequestProperty("Upgrade-Insecure-Requests","1");
 		
+		connection.setReadTimeout(30000); 
+		connection.setRequestProperty("User-Agent",user_agent_string);
 		
-		if( cookie_string_list != null )
-		{
-			String cookie = "";
-			
-			for(String qq : cookie_string_list)
-				cookie += qq + "; ";
-			
-			cookie += "path=/; HttpOnly";
-			
-			connection.setRequestProperty("Cookie",cookie);
-			//Log.i("set Cookie : ", cookie ) ;
-		}
+		connection = static_cks_cookie_manager.setConnectionCookieData(connection);
 		
 		//JDK HttpUrlConnection override getInputStream() method，urlConnection.getInputStream() connect();
 		
 		if( method.startsWith("POST") )
 		{
+			((HttpURLConnection) connection).setRequestMethod("POST");
+			connection.setDoOutput(true);
+			connection.setUseCaches(false);
+			
 			OutputStream output_stream = null;
 			DataOutputStream wr = null;
 			
@@ -553,90 +482,55 @@ public class HttpConnectResponse
 				final String HYPHENS    = "--";
 				final String CRLF       = "\r\n";
 				
-				if( https_check)
-				{	
-					((HttpsURLConnection) connection).setRequestMethod("POST");
-					((HttpsURLConnection) connection).setReadTimeout(30000);
-					//send post request
-					((HttpsURLConnection) connection).setDoOutput(true);
-					((HttpsURLConnection) connection).setDoInput(true);
-					((HttpsURLConnection) connection).setUseCaches(false);
-					((HttpsURLConnection) connection).setRequestProperty("Connection", "keep-alive");
-					((HttpsURLConnection) connection).setRequestProperty("Charset", "UTF-8");
-					// 把Content Type設為multipart/form-data
-					// 以及設定Boundary，Boundary很重要!
-					// 當你不只一個參數時，Boundary是用來區隔參數的  
-					((HttpsURLConnection) connection).setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
-					// 下面是開始寫參數
+				//send post request
+				connection.setDoInput(true);
+				connection.setRequestProperty("Connection", "keep-alive");
+				connection.setRequestProperty("Charset", "UTF-8");
+				// 把Content Type設為multipart/form-data
+				// 以及設定Boundary，Boundary很重要!
+				// 當你不只一個參數時，Boundary是用來區隔參數的  
+				connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
+				// 下面是開始寫參數
 					
-					output_stream = ((HttpsURLConnection) connection).getOutputStream(); // connect
+				output_stream = connection.getOutputStream(); // connect
 					
-					String file_name = parameters[1].split(",")[0];
-					String file_path = parameters[1].split(",")[1];
+				String file_name = parameters[1].split(",")[0];
+				String file_path = parameters[1].split(",")[1];
 					
-					String content_disposition = "Content-Disposition: form-data; name=\"image\"; filename=\"" + file_name + "\"";
-					String content_type = "Content-Type: image/jpeg";
+				String content_disposition = "Content-Disposition: form-data; name=\"image\"; filename=\"" + file_name + "\"";
+				String content_type = "Content-Type: image/jpeg";
 					
-					wr = new DataOutputStream(output_stream);
-					wr.writeBytes(HYPHENS + BOUNDARY + CRLF);       // write down--==================================
-					wr.writeBytes(content_disposition + CRLF);  	// write down(Disposition)
-					wr.writeBytes(content_type + CRLF);				// write down(Content type)
-					wr.writeBytes(CRLF);       
+				wr = new DataOutputStream(output_stream);
+				wr.writeBytes(HYPHENS + BOUNDARY + CRLF);       // write down--==================================
+				wr.writeBytes(content_disposition + CRLF);  	// write down(Disposition)
+				wr.writeBytes(content_type + CRLF);				// write down(Content type)
+				wr.writeBytes(CRLF);       
 					
-					FileInputStream file_input_stream = new FileInputStream(new File(file_path));
-					wr.write( inputStreamToByteArray(file_input_stream));
-					wr.writeBytes(CRLF);
+				FileInputStream file_input_stream = new FileInputStream(new File(file_path));
+				wr.write( inputStreamToByteArray(file_input_stream));
+				wr.writeBytes(CRLF);
 					
-					for(String qq : parameters[0].split("&")  )
+				for(String qq : parameters[0].split("&")  )
+				{
+					//Log.i("qq ",qq);
+					String[] qq_array = qq.split("=");
+					
+					if(qq_array.length > 1)
 					{
-						//Log.i("qq ",qq);
-						String[] qq_array = qq.split("=");
-						
-						if(qq_array.length > 1)
-						{
-							wr.writeBytes(HYPHENS + BOUNDARY + CRLF);       // write down--==================================
-							wr.writeBytes("Content-Disposition: form-data; name=\"" + qq_array[0] + "\"" + CRLF);
-							wr.writeBytes(CRLF);
-							wr.writeBytes(qq_array[1]);
-							wr.writeBytes(CRLF);
-						}
+						wr.writeBytes(HYPHENS + BOUNDARY + CRLF);       // write down--==================================
+						wr.writeBytes("Content-Disposition: form-data; name=\"" + qq_array[0] + "\"" + CRLF);
+						wr.writeBytes(CRLF);
+						wr.writeBytes(qq_array[1]);
+						wr.writeBytes(CRLF);
 					}
-					
-					wr.writeBytes(HYPHENS + BOUNDARY + HYPHENS);    // (結束)寫--==================================--      
-					
-					file_input_stream.close();
 				}
-				else
-				{	
-					((HttpURLConnection) connection).setRequestMethod("POST");
-					((HttpURLConnection) connection).setReadTimeout(30000);
-					((HttpURLConnection) connection).setDoOutput(true);
-					((HttpURLConnection) connection).setDoInput(true);
-					((HttpURLConnection) connection).setUseCaches(false);
-					output_stream = ((HttpURLConnection) connection).getOutputStream();
-				}
+				
+				wr.writeBytes(HYPHENS + BOUNDARY + HYPHENS);    // (結束)寫--==================================--
+				file_input_stream.close();
 			}
 			else	
 			{
-				//add request header		
-				if(https_check)
-				{	
-					((HttpsURLConnection) connection).setRequestMethod("POST");
-					((HttpsURLConnection) connection).setReadTimeout(30000);
-					//send post request
-					((HttpsURLConnection) connection).setDoOutput(true);
-					((HttpsURLConnection) connection).setUseCaches(false);
-					output_stream = ((HttpsURLConnection) connection).getOutputStream(); // connect
-				}
-				else
-				{	
-					((HttpURLConnection) connection).setRequestMethod("POST");
-					((HttpURLConnection) connection).setReadTimeout(30000);
-					((HttpURLConnection) connection).setDoOutput(true);
-					((HttpURLConnection) connection).setUseCaches(false);
-					output_stream = ((HttpURLConnection) connection).getOutputStream();
-				}
-				
+				output_stream = connection.getOutputStream();	
 				wr = new DataOutputStream(output_stream);
 				wr.writeBytes(parameters[0]);
 			}
@@ -652,55 +546,13 @@ public class HttpConnectResponse
 		}
 		else
 		{
-			if(https_check)
-			{	
-				((HttpsURLConnection) connection).setRequestMethod("GET");
-				((HttpsURLConnection) connection).setReadTimeout(120000);
-				//send post request
-				//((HttpsURLConnection) connection).setDoOutput(true);
-				((HttpsURLConnection) connection).connect();
-			}
-			else
-			{	
-				((HttpURLConnection) connection).setRequestMethod("GET");
-				((HttpURLConnection) connection).setReadTimeout(120000);
-				//((HttpURLConnection) connection).setDoOutput(true);
-				((HttpURLConnection) connection).connect();
-			}
+			((HttpURLConnection) connection).setRequestMethod("GET");
+			connection.connect();
 		}
 		
+		static_cks_cookie_manager.getConnectionCookieData(connection);
 		
-		if( cookie_string_list == null )
-		{
-			cookie_string_list = new ArrayList<String>();
-			if( connection.getHeaderField("Set-Cookie") != null && connection.getHeaderField("Set-Cookie").contains(";") )
-				cookie_string_list.add(connection.getHeaderField("Set-Cookie").split(";")[0]);
-			
-			//Log.i("add new cookie : ", cookie_string_list.toString());
-		}	
-		
-		String cookie_temp = connection.getHeaderField("Set-Cookie");
-			
-		if( cookie_temp != null && !cookie_string_list.contains(cookie_temp.split(";")[0]))
-		{
-			//Log.i("temp cookie",cookie_temp);
-			cookie_string_list.add(cookie_temp.split(";")[0]);
-			
-			//cookie_string_list.add("__utma=4361142.1055650384.1421299797.1434792678.1434938224.71");
-			//cookie_string_list.add("style=Small Text");
-			//cookie_string_list.add("_ga=GA1.3.1055650384.1421299797");
-			
-			//Log.i("add new cookie : " , cookie_string_list.toString());
-		}
-		else
-		{	
-			//Log.i("add new cookie : " , "cookie are the same ,not be to add");
-		}
-		
-		if(https_check)
-			CONNECTION_STATE_CODE = ((HttpsURLConnection) connection).getResponseCode();
-		else
-			CONNECTION_STATE_CODE = ((HttpURLConnection) connection).getResponseCode();
+		CONNECTION_STATE_CODE = ((HttpURLConnection) connection).getResponseCode();
 		
 		Log.i("Response Code : " , String.valueOf(CONNECTION_STATE_CODE) );
 		
@@ -713,47 +565,23 @@ public class HttpConnectResponse
 			//Log.i("Sending 'GET' request to URL : " , redirect_url);
 			
 			if(https_check)
-			{	
 				connection = disableCertificateALLHostName(((HttpsURLConnection) url.openConnection()));
-				
-				((HttpsURLConnection) connection).setInstanceFollowRedirects(false); 
-				//HttpsURLConnection.setFollowRedirects(false);
-			}
 			else	
-			{	
 				connection = url.openConnection(); 
-				((HttpURLConnection) connection).setInstanceFollowRedirects(false); 
-				//HttpURLConnection.setFollowRedirects(false);
-			}
 			
+			((HttpURLConnection) connection).setInstanceFollowRedirects(false); 
 			
-			if( cookie_string_list != null )
-			{
-				String cookie = "";
-				
-				for(String qq : cookie_string_list)
-					cookie += qq + "; ";
-				
-				cookie += "path=/; HttpOnly";
-				
-				connection.setRequestProperty("Cookie",cookie);
-				//Log.i("set Cookie : " , cookie ) ;
-			}
+			connection.setRequestProperty("User-Agent","Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36 CKSHttpConnect");
 			
-			if(https_check)
-				CONNECTION_STATE_CODE = ((HttpsURLConnection) connection).getResponseCode();
-			else
-				CONNECTION_STATE_CODE = ((HttpURLConnection) connection).getResponseCode();
+			connection = static_cks_cookie_manager.setConnectionCookieData(connection);
+			
+			CONNECTION_STATE_CODE = ((HttpURLConnection) connection).getResponseCode();
 			
 			Log.i("Response Code : " ,String.valueOf( CONNECTION_STATE_CODE) );
 		}	
 		
 		if( CONNECTION_STATE_CODE == 200 )
-		{	
-			InputStream input_stream = connection.getInputStream();
-			
-			http_response = inputStreamToByteArray(input_stream);	
-		}
+			http_response = inputStreamToByteArray(connection.getInputStream());	
 		else
 			return null;
 		

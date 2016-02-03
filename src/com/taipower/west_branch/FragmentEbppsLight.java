@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -262,11 +263,13 @@ public class FragmentEbppsLight extends Fragment
 		}
 	};
 	
-	
 	private void loginEbpps(boolean auto_login_tag)
 	{
 		String ebpps_myAction_password_url;
 		String ebpps_myAction_check_PWD_url = "";
+		
+		StringBuilder password_paraments;
+		StringBuilder check_PWD_paraments;
 		
 		if( auto_login_tag && auto_login_switch) 	
        	{ 	
@@ -278,10 +281,17 @@ public class FragmentEbppsLight extends Fragment
             ((TextView) findViewById(R.id.ebpps_account)).setText(ebpps_account_unhash);
 	        ((TextView) findViewById(R.id.ebpps_password)).setText(ebpps_account_unhash);
             
-            ebpps_myAction_password_url = "https://ebpps.taipower.com.tw/EBPPS/action/conLogin.do?myAction=password&account=" + ebpps_account_unhash;        
-            
-            ebpps_myAction_check_PWD_url = "https://ebpps.taipower.com.tw/EBPPS/action/conLogin.do?myAction=check_PWD&old_hash=" + ebpps_password_hash + "&words2=HYCAPI_INSTEAD&pkcs=&account=&words=********";
+            //ebpps_myAction_password_url = "https://ebpps.taipower.com.tw/EBPPS/action/conLogin.do?myAction=password&account=" + ebpps_account_unhash;        
+            //ebpps_myAction_check_PWD_url = "https://ebpps.taipower.com.tw/EBPPS/action/conLogin.do?myAction=check_PWD&old_hash=" + ebpps_password_hash + "&words2=HYCAPI_INSTEAD&pkcs=&account=&words=********";
            
+            password_paraments = new StringBuilder("");
+			password_paraments.append("myAction=password&");
+			password_paraments.append("account=" + ebpps_account_unhash);
+            
+            check_PWD_paraments = new StringBuilder("");
+            check_PWD_paraments.append("myAction=check_PWD&");
+            check_PWD_paraments.append("old_hash=" + ebpps_password_hash + "&words2=HYCAPI_INSTEAD&pkcs=&account=&words=********");
+            
             save_ebpps_account_hash = ebpps_account_hash;
             save_ebpps_password_hash = ebpps_password_hash;
             //Log.i("ebpps_account :",ebpps_account);
@@ -293,7 +303,16 @@ public class FragmentEbppsLight extends Fragment
 			String ebpps_account = ((TextView) findViewById(R.id.ebpps_account)).getText().toString();
 	        String ebpps_password_unhash = ((TextView) findViewById(R.id.ebpps_password)).getText().toString();
 			
-	        String ebpps_password_hash = SHA1Util.b64_sha1(ebpps_password_unhash);
+	        String ebpps_password_hash = null;
+			try 
+			{
+				ebpps_password_hash = URLEncoder.encode(SHA1Util.ebppsB64_sha1(ebpps_password_unhash), "UTF-8");
+			}
+			catch (UnsupportedEncodingException e) 
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	        
 	        String ebpps_account_hash = ebpps_account.substring(0, 1) + new BigInteger(ebpps_account.substring(1).toString()).multiply(new BigInteger(Build.SERIAL.replaceAll("[^0-9]+",""))).toString();   ;
 			
@@ -303,12 +322,23 @@ public class FragmentEbppsLight extends Fragment
 	        //Log.i("ebpps_account", ebpps_account );
 	        //Log.i("ebpps_password_hash", ebpps_password_hash );
 	        
-			ebpps_myAction_password_url = "https://ebpps.taipower.com.tw/EBPPS/action/conLogin.do?myAction=password&account=" + ebpps_account;        		
-                		
-            ebpps_myAction_check_PWD_url = "https://ebpps.taipower.com.tw/EBPPS/action/conLogin.do?myAction=check_PWD&old_hash=" + ebpps_password_hash + "&words2=HYCAPI_INSTEAD&pkcs=&account=&words=********";
+			//ebpps_myAction_password_url = "https://ebpps.taipower.com.tw/EBPPS/action/conLogin.do?myAction=password&account=" + ebpps_account;        		
+            //ebpps_myAction_check_PWD_url = "https://ebpps.taipower.com.tw/EBPPS/action/conLogin.do?myAction=check_PWD&old_hash=" + ebpps_password_hash + "&words2=HYCAPI_INSTEAD&pkcs=&account=&words=********";
+            
+            password_paraments = new StringBuilder("");
+			password_paraments.append("myAction=password&");
+			password_paraments.append("account=" + ebpps_account);
+            
+            check_PWD_paraments = new StringBuilder("");
+            check_PWD_paraments.append("myAction=check_PWD&");
+            check_PWD_paraments.append("old_hash=" + ebpps_password_hash + "&words2=HYCAPI_INSTEAD&pkcs=&account=&words=********");
 		}       	
-        		
-		new LoadingDataAsyncTask().execute("login_tag",ebpps_myAction_password_url, ebpps_myAction_check_PWD_url);
+		
+		//new LoadingDataAsyncTask().execute("login_tag",ebpps_myAction_password_url, ebpps_myAction_check_PWD_url);
+		
+		String ebpps_myAction_url = "https://ebpps.taipower.com.tw/EBPPS/action/conLogin.do";
+		
+		new LoadingDataAsyncTask().execute("login_tag",ebpps_myAction_url,password_paraments.toString(),check_PWD_paraments.toString());
 	}
 	
 	
@@ -469,7 +499,8 @@ public class FragmentEbppsLight extends Fragment
 					//response_data = HttpConnectResponse.onOpenConnection(params[1], "get", null, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
         			
 					connection.setUrl(params[1]);
-					connection.setConnectMethod("GET", null);
+					//connection.setConnectMethod("GET", null);
+					connection.setConnectMethod("POST", new String[]{params[2]});
 					connection.disableCertificate(true);
 					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
 					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
@@ -490,9 +521,11 @@ public class FragmentEbppsLight extends Fragment
         				//response_data = HttpConnectResponse.apacheConnection(params[2], "get", null, HTTP.ASCII , HttpConnectResponse.COOKIE_KEEP);
         				//response_data = HttpConnectResponse.onOpenConnection(params[2], "get", null, HttpConnectResponse.COOKIE_KEEP, HttpConnectResponse.HTTP_NONREDIRECT);
             			
-        				connection.setUrl(params[2]);
-    					connection.setConnectMethod("GET", null);
-    					connection.disableCertificate(true);
+        				//connection.setUrl(params[2]);
+        				connection.setUrl(params[1]);
+    					//connection.setConnectMethod("GET", null);
+        				connection.setConnectMethod("POST", new String[]{params[3]});
+        				connection.disableCertificate(true);
     					connection.setCookieStatus(HttpConnectResponse.COOKIE_KEEP);
     					connection.setRedirectStatus(HttpConnectResponse.HTTP_NONREDIRECT);
     					response_data = connection.startConnectAndResponseByteArray();
@@ -1030,7 +1063,7 @@ public class FragmentEbppsLight extends Fragment
 			if( result != 0 )
 			{	
 				String error_message = "";
-				Log.i("result", "" + result);
+				//Log.i("result", "" + result);
 				
 				if( result == 8)
 					error_message = "帳號錯誤";

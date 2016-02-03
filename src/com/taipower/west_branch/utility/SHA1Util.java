@@ -32,6 +32,34 @@ public class SHA1Util {
         s = (s == null) ? "" : s;
         return binb2b64(core_sha1(str2binb(s), s.length() * chrsz));
     }
+    
+    public static String ebppsB64_sha1(String s) {
+        s = (s == null) ? "" : s;
+        return ebppsBinb2b64(core_sha1(str2binb(s), s.length() * chrsz));
+    }
+    
+    private static String ebppsBinb2b64(int[] binarray) {
+        String tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        String str = "";
+        binarray = strechbinarray(binarray, binarray.length * 4);
+
+        for (int i = 0; i < binarray.length * 4; i += 3) {
+            int triplet = (((binarray[i >> 2] >> 8 * (3 - i % 4)) & 0xff) << 16)
+                    | (((binarray[i + 1 >> 2] >> 8 * (3 - (i + 1) % 4)) & 0xff) << 8)
+                    | ((binarray[i + 2 >> 2] >> 8 * (3 - (i + 2) % 4)) & 0xff);
+
+            for (int j = 0; j < 4; j++) {
+                if (i * 8 + j * 6 > binarray.length * 32) {
+                    str += b64pad;
+                } else {
+                    str += tab.charAt((triplet >> 6 * (3 - j)) & 0x3f);
+                }
+            }
+        }
+        
+        return str.substring(0,27) + "="; // in ebpps hash code add %3D @ final 
+    }
+    
 
     private static String binb2b64(int[] binarray) {
         String tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -52,9 +80,9 @@ public class SHA1Util {
             }
         }
 
-        return cleanb64str(str) + "%3D"; // in ebpps hash code add %3D @ final 
+        return cleanb64str(str); 
     }
-
+    
     private static String binb2hex(int[] binarray) {
         String hex_tab = hexcase ? "0123456789abcdef" : "0123456789abcdef";
         String str = "";
